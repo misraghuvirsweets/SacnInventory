@@ -356,7 +356,11 @@
         numOfWorkers: (navigator.hardwareConcurrency ? Math.min(4, navigator.hardwareConcurrency) : 2),
         locate: true,
         decoder: {
-          readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "upc_reader"]
+          // Restricted to standard retail formats (EAN/UPC), which carry a
+          // built-in checksum digit — Quagga verifies it before returning a
+          // result, so wrong reads are far less likely than with code_39/128
+          // (which have no checksum and are more prone to live-camera misreads).
+          readers: ["ean_reader", "ean_8_reader", "upc_reader"]
         }
       }, function(err){
         if (err) {
@@ -375,18 +379,15 @@
       if (!scannerRunning) return;
       var code = result.codeResult.code;
 
-      // Ignore obviously-too-short noise reads without restricting to a
-      // specific barcode format (keeps support for alphanumeric codes).
       if (!code || code.length < 6) return;
 
       detectionBuffer.push(code);
-      if (detectionBuffer.length > 6) detectionBuffer.shift();
+      if (detectionBuffer.length > 3) detectionBuffer.shift();
 
-      // Lock in as soon as the SAME code shows up twice within the recent
-      // reads (not necessarily back-to-back) — much faster than requiring
-      // 3 reads in an exact row, while still guarding against one-off misreads.
-      var matches = detectionBuffer.filter(function(c){ return c === code; }).length;
-      if (matches >= 2) {
+      // Require the same code back-to-back (not just "seen twice recently") —
+      // a much stronger stability signal, so a one-off misread can't lock in.
+      var lastTwo = detectionBuffer.slice(-2);
+      if (lastTwo.length === 2 && lastTwo[0] === lastTwo[1]) {
         acceptScan(code);
       } else {
         $("scanner-status-text").innerText = "Reading: " + code + " …";
