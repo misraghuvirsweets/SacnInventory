@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -348,20 +349,16 @@
         locator: {
           patchSize: "medium",
           halfSample: true,
-          // Restrict the search to roughly where the green guide box is —
-          // faster per-frame processing and fewer false reads from packaging
-          // graphics elsewhere in the frame.
-          area: { top: "32%", right: "8%", left: "8%", bottom: "32%" }
+          // Slightly more generous than before — catches the barcode even
+          // if it's not perfectly centered in the guide box.
+          area: { top: "25%", right: "5%", left: "5%", bottom: "25%" }
         },
         numOfWorkers: (navigator.hardwareConcurrency ? Math.min(4, navigator.hardwareConcurrency) : 2),
         locate: true,
         decoder: {
-          // Your barcodes are alphanumeric (e.g. "R643..."). EAN/UPC readers
-          // were removed — they were occasionally misreading the same bar
-          // pattern as an unrelated numeric code, which is what caused the
-          // wrong numbers showing up. Fewer readers to check per frame also
-          // makes scanning noticeably faster.
-          readers: ["code_128_reader", "code_39_reader"]
+          // Casting a wider net across alphanumeric/SKU-style barcode formats
+          // (still excluding EAN/UPC, which were misreading these as wrong numbers).
+          readers: ["code_128_reader", "code_39_reader", "codabar_reader", "code_93_reader"]
         }
       }, function(err){
         if (err) {
