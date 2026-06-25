@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -272,7 +271,7 @@
        Deploy Code.gs as a Web App with "Who has access: Anyone" first,
        then paste that deployment URL here.
        ===================================================================== */
-    var APPS_SCRIPT_URL = "https://script.google.com/a/macros/raghuvirsweets.co.in/s/AKfycbxWuI1eHi8DMil_OLkMaM_wXq3i2KUksLk6w65xLMEUStfJbKLS44gZqW7zoYv-7BfZxA/exec";
+    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWuI1eHi8DMil_OLkMaM_wXq3i2KUksLk6w65xLMEUStfJbKLS44gZqW7zoYv-7BfZxA/exec";
 
     /* ============== JSONP helper (talks to Google Sheets via Apps Script, no CORS issues) ============== */
     var jsonpCounter = 0;
@@ -331,6 +330,14 @@
     var scannerRunning = false;
     var detectionBuffer = [];
 
+    // Native path (Android Chrome / ChromeOS / macOS) — uses the phone's own
+    // built-in barcode detector via Google Play Services. No format-guessing
+    // needed; it recognizes the format automatically and is far more reliable
+    // than a pure-JavaScript decoder.
+    var nativeStream = null;
+    var nativeDetector = null;
+    var nativeLoopActive = false;
+
     function startScanner(side){
       if ($("scanner-modal").classList.contains("active")) return;
 
@@ -339,6 +346,60 @@
       $("scanner-status-text").innerText = "Point the camera at the barcode and hold steady";
       $("scanner-modal").classList.add("active");
 
+      if ("BarcodeDetector" in window) {
+        startNativeScanner(side);
+      } else {
+        startQuaggaScanner(side);
+      }
+    }
+
+    async function startNativeScanner(side){
+      try {
+        nativeDetector = new BarcodeDetector({
+          formats: ["code_128", "code_39", "codabar", "code_93", "ean_13", "ean_8", "upc_a", "upc_e", "itf"]
+        });
+      } catch(e) {
+        nativeDetector = new BarcodeDetector();
+      }
+
+      try {
+        nativeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      } catch (err) {
+        console.error(err);
+        $("scanner-status-text").innerText = "Camera error — please allow camera access and try again.";
+        return;
+      }
+
+      var video = document.createElement("video");
+      video.setAttribute("playsinline", "");
+      video.muted = true;
+      video.srcObject = nativeStream;
+      $("scanner-viewport").innerHTML = "";
+      $("scanner-viewport").appendChild(video);
+
+      try { await video.play(); } catch(e) {}
+
+      scannerRunning = true;
+      nativeLoopActive = true;
+      nativeDetectLoop(video);
+    }
+
+    async function nativeDetectLoop(video){
+      while (nativeLoopActive) {
+        try {
+          var barcodes = await nativeDetector.detect(video);
+          if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+            acceptScan(barcodes[0].rawValue);
+            return;
+          }
+        } catch (err) {
+          console.error(err);
+        }
+        await new Promise(function(resolve){ setTimeout(resolve, 150); });
+      }
+    }
+
+    function startQuaggaScanner(side){
       Quagga.init({
         inputStream: {
           name: "Live",
@@ -349,15 +410,11 @@
         locator: {
           patchSize: "medium",
           halfSample: true,
-          // Slightly more generous than before — catches the barcode even
-          // if it's not perfectly centered in the guide box.
           area: { top: "25%", right: "5%", left: "5%", bottom: "25%" }
         },
         numOfWorkers: (navigator.hardwareConcurrency ? Math.min(4, navigator.hardwareConcurrency) : 2),
         locate: true,
         decoder: {
-          // Casting a wider net across alphanumeric/SKU-style barcode formats
-          // (still excluding EAN/UPC, which were misreading these as wrong numbers).
           readers: ["code_128_reader", "code_39_reader", "codabar_reader", "code_93_reader"]
         }
       }, function(err){
@@ -382,8 +439,6 @@
       detectionBuffer.push(code);
       if (detectionBuffer.length > 3) detectionBuffer.shift();
 
-      // Require the same code back-to-back (not just "seen twice recently") —
-      // a much stronger stability signal, so a one-off misread can't lock in.
       var lastTwo = detectionBuffer.slice(-2);
       if (lastTwo.length === 2 && lastTwo[0] === lastTwo[1]) {
         acceptScan(code);
@@ -407,8 +462,15 @@
 
     function stopScanner(){
       scannerRunning = false;
+      nativeLoopActive = false;
+
+      if (nativeStream) {
+        try { nativeStream.getTracks().forEach(function(t){ t.stop(); }); } catch(e) {}
+        nativeStream = null;
+      }
       try { Quagga.offDetected(onBarcodeDetected); } catch(e) {}
       try { Quagga.stop(); } catch(e) {}
+
       $("scanner-modal").classList.remove("active");
       $("scanner-viewport").innerHTML = "";
       activeSide = null;
