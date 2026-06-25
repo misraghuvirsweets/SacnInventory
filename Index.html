@@ -271,7 +271,7 @@
        Deploy Code.gs as a Web App with "Who has access: Anyone" first,
        then paste that deployment URL here.
        ===================================================================== */
-    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWuI1eHi8DMil_OLkMaM_wXq3i2KUksLk6w65xLMEUStfJbKLS44gZqW7zoYv-7BfZxA/exec";
+    var APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
 
     /* ============== JSONP helper (talks to Google Sheets via Apps Script, no CORS issues) ============== */
     var jsonpCounter = 0;
@@ -345,8 +345,15 @@
           target: document.querySelector("#scanner-viewport"),
           constraints: { facingMode: "environment" }
         },
-        locator: { patchSize: "medium", halfSample: true },
-        numOfWorkers: 0,
+        locator: {
+          patchSize: "medium",
+          halfSample: true,
+          // Restrict the search to roughly where the green guide box is —
+          // faster per-frame processing and fewer false reads from packaging
+          // graphics elsewhere in the frame.
+          area: { top: "32%", right: "8%", left: "8%", bottom: "32%" }
+        },
+        numOfWorkers: (navigator.hardwareConcurrency ? Math.min(4, navigator.hardwareConcurrency) : 2),
         locate: true,
         decoder: {
           readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "upc_reader"]
@@ -368,11 +375,18 @@
       if (!scannerRunning) return;
       var code = result.codeResult.code;
 
-      detectionBuffer.push(code);
-      if (detectionBuffer.length > 5) detectionBuffer.shift();
+      // Ignore obviously-too-short noise reads without restricting to a
+      // specific barcode format (keeps support for alphanumeric codes).
+      if (!code || code.length < 6) return;
 
-      var lastThree = detectionBuffer.slice(-3);
-      if (lastThree.length === 3 && lastThree[0] === lastThree[1] && lastThree[1] === lastThree[2]) {
+      detectionBuffer.push(code);
+      if (detectionBuffer.length > 6) detectionBuffer.shift();
+
+      // Lock in as soon as the SAME code shows up twice within the recent
+      // reads (not necessarily back-to-back) — much faster than requiring
+      // 3 reads in an exact row, while still guarding against one-off misreads.
+      var matches = detectionBuffer.filter(function(c){ return c === code; }).length;
+      if (matches >= 2) {
         acceptScan(code);
       } else {
         $("scanner-status-text").innerText = "Reading: " + code + " …";
