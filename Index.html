@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Raghuvir Sweets and Bakers — Inventory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght=500;600&family=Inter:wght=400;500;600&family=JetBrains+Mono:wght=500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#FBF5EC;
+      --surface:#FFFFFF;
+      --text:#2B2118;
+      --text-soft:#8A7860;
+      --border:#E8DCC8;
+      --green:#5B7B45;
+      --green-soft:#EAF0E2;
+      --terracotta:#C1572D;
+      --terracotta-soft:#FBEAE1;
+      --radius:14px;
+    }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html,body{
+      margin:0; background:var(--bg); color:var(--text);
+      font-family:'Inter',-apple-system,Segoe UI,sans-serif;
+    }
+    .wrap{ max-width:480px; margin:0 auto; padding:20px 16px 48px; }
+
+    header{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    header h1{ font-family:'Fraunces',serif; font-size:21px; font-weight:600; margin:0; line-height:1.25; }
+    header p{ margin:2px 0 0; font-size:12.5px; color:var(--text-soft); }
+
+    .divider{
+      height:16px; margin:18px 0 22px; border-radius:2px; opacity:0.16;
+      background:repeating-linear-gradient(90deg,
+        var(--text) 0 2px, transparent 2px 5px,
+        var(--text) 5px 6px, transparent 6px 12px,
+        var(--text) 12px 15px, transparent 15px 22px,
+        var(--text) 22px 23px, transparent 23px 30px);
+    }
+
+    #menu-screen{ display:flex; flex-direction:row; gap:12px; }
+    .menu-btn{
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+      padding:24px 12px; border:none; border-radius:var(--radius); cursor:pointer;
+      color:#fff; text-align:center; font-family:inherit; flex:1; min-width:0;
+    }
+    .menu-btn.inward{ background:var(--green); }
+    .menu-btn.outward{ background:var(--terracotta); }
+    .menu-btn:active{ opacity:0.9; }
+    .menu-btn-title{ font-family:'Fraunces',serif; font-size:18px; font-weight:600; }
+
+    .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+    .panel-head{ display:flex; align-items:center; gap:10px; padding:13px 18px; font-family:'Fraunces',serif; font-size:16px; font-weight:600; border-bottom:1px solid var(--border); }
+    .panel.inward .panel-head{ background:var(--green-soft); color:var(--green); }
+    .panel.outward .panel-head{ background:var(--terracotta-soft); color:var(--terracotta); }
+    .back-btn{ border:none; background:none; font-size:19px; line-height:1; cursor:pointer; color:inherit; padding:2px 4px 2px 0; }
+    .panel-body{ padding:16px 18px 18px; display:flex; flex-direction:column; gap:12px; }
+
+    .field label{ display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:600; margin-bottom:5px; }
+    input,select{ width:100%; padding:11px; border:1px solid var(--border); border-radius:8px; font-size:16px; font-family:inherit; background:#fff; color:var(--text); min-height:44px; }
+
+    .scan-trigger-box {
+      width: 100%; padding: 22px; text-align: center;
+      border: 3px dashed var(--border); border-radius: 12px;
+      cursor: pointer; font-weight: 600; font-size: 16px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+      background: #fff; margin-bottom: 4px; transition: all 0.2s;
+    }
+    .panel.inward .scan-trigger-box { color: var(--green); border-color: var(--green); background: var(--green-soft); }
+    .panel.outward .scan-trigger-box { color: var(--terracotta); border-color: var(--terracotta); background: var(--terracotta-soft); }
+    .scan-trigger-box:active { transform: scale(0.98); opacity: 0.9; }
+    .scan-trigger-box span { font-size: 11px; font-weight: 500; opacity: 0.8; }
+
+    .fallback-link{
+      text-align:center; font-size:12px; font-weight:600; color:var(--text-soft);
+      text-decoration:underline; cursor:pointer; margin-bottom:8px; background:none; border:none; font-family:inherit;
+    }
+
+    .hidden-hardware-input { display: none !important; }
+
+    .qty-row{ display:flex; gap:8px; }
+    .qty-row input{ text-align:center; }
+    .qty-btn{ width:44px; flex-shrink:0; border:1px solid var(--border); border-radius:8px; background:#fff; font-size:19px; line-height:1; cursor:pointer; min-height:44px; }
+
+    .save-btn{ margin-top:4px; padding:13px; border:none; border-radius:8px; font-size:15px; font-weight:600; font-family:inherit; color:#fff; cursor:pointer; min-height:46px; }
+    .panel.inward .save-btn{ background:var(--green); }
+    .panel.outward .save-btn{ background:var(--terracotta); }
+
+    .status{ min-height:16px; font-size:12.5px; margin-top: 2px; font-weight: 500; }
+    .status.success{ color:var(--green); }
+    .status.error{ color:var(--terracotta); }
+    footer{ text-align:center; margin-top:26px; font-size:11.5px; color:var(--text-soft); }
+
+    /* ===== LIVE SCANNER OVERLAY ===== */
+    #scanner-modal{
+      position:fixed; inset:0; background:#0B0C0A; z-index:9999;
+      display:none;
+    }
+    #scanner-modal.active{ display:block; }
+
+    #scanner-viewport{ position:absolute; inset:0; overflow:hidden; }
+    #scanner-viewport video,
+    #scanner-viewport canvas{
+      position:absolute; inset:0;
+      width:100% !important; height:100% !important;
+      object-fit:cover;
+    }
+
+    .scanner-topbar{
+      position:absolute; top:0; left:0; right:0; z-index:3;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 16px calc(16px + env(safe-area-inset-top, 0px));
+      background:linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
+    }
+    .scanner-topbar .scanner-title{
+      color:#fff; font-family:'Fraunces',serif; font-size:16px; font-weight:600;
+    }
+    .scanner-cancel{
+      background:rgba(255,255,255,0.16); color:#fff; border:none; border-radius:8px;
+      padding:9px 14px; font-weight:600; font-size:13px; font-family:inherit; cursor:pointer;
+    }
+    .scanner-cancel:active{ opacity:0.85; }
+
+    .scanner-guide{
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      width:82%; max-width:380px; height:110px;
+      border:3px solid var(--green); border-radius:12px;
+      box-shadow:0 0 0 2000px rgba(0,0,0,0.5);
+      z-index:2; pointer-events:none; overflow:hidden;
+    }
+    .scanner-guide::after{
+      content:""; position:absolute; left:6%; right:6%; height:2px;
+      background:var(--green); box-shadow:0 0 10px var(--green);
+      top:6%; animation:scanline 1.7s ease-in-out infinite;
+    }
+    @keyframes scanline{
+      0%{ top:6%; } 50%{ top:88%; } 100%{ top:6%; }
+    }
+
+    .scanner-status{
+      position:absolute; bottom:0; left:0; right:0; z-index:3;
+      text-align:center; color:#fff; font-size:13px; font-weight:500;
+      padding:0 24px calc(28px + env(safe-area-inset-bottom, 0px));
+      background:linear-gradient(to top, rgba(0,0,0,0.55), transparent);
+      padding-top:40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Raghuvir Sweets and Bakers</h1>
+        <p>Inventory Desk — Live Scan Build</p>
+      </div>
+    </header>
+    <div class="divider"></div>
+
+    <div id="menu-screen">
+      <button class="menu-btn inward" type="button" onclick="showScreen('in')">
+        <span class="menu-btn-title">Inward (IN)</span>
+      </button>
+      <button class="menu-btn outward" type="button" onclick="showScreen('out')">
+        <span class="menu-btn-title">Outward (OUT)</span>
+      </button>
+    </div>
+
+    <div id="in-screen" class="panel inward" hidden>
+      <div class="panel-head">
+        <button class="back-btn" type="button" onclick="exitScreen('in')">←</button>
+        <span>Inward Unit</span>
+      </div>
+      <div class="panel-body">
+
+        <div class="scan-trigger-box" onclick="startScanner('in')">
+          <strong>⚡ TAP TO START SCANNING</strong>
+          <span>(Camera will open — point it at the barcode, it scans automatically)</span>
+        </div>
+        <button class="fallback-link" type="button" onclick="triggerHardwareLens('in')">Camera not opening? Tap to take a photo instead</button>
+        <input type="file" id="in-lens" class="hidden-hardware-input" accept="image/*" capture="environment" onchange="processLensFrame(this, 'in')">
+
+        <div class="field">
+          <label>Barcode</label>
+          <input id="in-barcode" type="text" placeholder="Waiting for barcode data...">
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="in-category">
+            <option value="">Select category</option>
+            <option>Bakery</option><option>Sweets</option><option>Namkeen</option><option>Nashta</option><option>Cake</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Product Name</label>
+          <input id="in-product" type="text" readonly style="background:#f5f5f5;">
+        </div>
+        <div class="field">
+          <label>Quantity</label>
+          <div class="qty-row">
+            <button class="qty-btn" type="button" onclick="adjustQty('in',-1)">−</button>
+            <input id="in-qty" type="number" min="0" value="0">
+            <button class="qty-btn" type="button" onclick="adjustQty('in',1)">+</button>
+          </div>
+        </div>
+        <button class="save-btn" type="button" onclick="saveEntry('in')">Save Inward</button>
+        <div id="in-status" class="status"></div>
+      </div>
+    </div>
+
+    <div id="out-screen" class="panel outward" hidden>
+      <div class="panel-head">
+        <button class="back-btn" type="button" onclick="exitScreen('out')">←</button>
+        <span>Outward Unit</span>
+      </div>
+      <div class="panel-body">
+
+        <div class="scan-trigger-box" onclick="startScanner('out')">
+          <strong>⚡ TAP TO START SCANNING</strong>
+          <span>(Camera will open — point it at the barcode, it scans automatically)</span>
+        </div>
+        <button class="fallback-link" type="button" onclick="triggerHardwareLens('out')">Camera not opening? Tap to take a photo instead</button>
+        <input type="file" id="out-lens" class="hidden-hardware-input" accept="image/*" capture="environment" onchange="processLensFrame(this, 'out')">
+
+        <div class="field">
+          <label>Barcode</label>
+          <input id="out-barcode" type="text" placeholder="Waiting for barcode data...">
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="out-category">
+            <option value="">Select category</option>
+            <option>Bakery</option><option>Sweets</option><option>Namkeen</option><option>Nashta</option><option>Cake</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Product Name</label>
+          <input id="out-product" type="text" readonly style="background:#f5f5f5;">
+        </div>
+        <div class="field">
+          <label>Quantity</label>
+          <div class="qty-row">
+            <button class="qty-btn" type="button" onclick="adjustQty('out',-1)">−</button>
+            <input id="out-qty" type="number" min="0" value="0">
+            <button class="qty-btn" type="button" onclick="adjustQty('out',1)">+</button>
+          </div>
+        </div>
+        <button class="save-btn" type="button" onclick="saveEntry('out')">Save Outward</button>
+        <div id="out-status" class="status"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE SCANNER OVERLAY -->
+  <div id="scanner-modal">
+    <div id="scanner-viewport"></div>
+    <div class="scanner-topbar">
+      <span class="scanner-title">Scanning…</span>
+      <button class="scanner-cancel" type="button" onclick="stopScanner()">✕ Cancel</button>
+    </div>
+    <div class="scanner-guide"></div>
+    <div class="scanner-status" id="scanner-status-text">Point the camera at the barcode and hold steady</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+  <script>
+    function $(id){ return document.getElementById(id); }
+
+    /* =====================================================================
+       PASTE YOUR APPS SCRIPT WEB APP URL BELOW (must end in /exec).
+       Deploy Code.gs as a Web App with "Who has access: Anyone" first,
+       then paste that deployment URL here.
+       ===================================================================== */
+    var APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+    /* ============== JSONP helper (talks to Google Sheets via Apps Script, no CORS issues) ============== */
+    var jsonpCounter = 0;
+    function jsonpRequest(params, onSuccess, onError) {
+      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("https://script.google.com/macros/s/AKfycbwyvvT4gepyO1GrJTJZUdFn6gwVviR5Ki6B2bZPReeW9wF1aP1-7qMDFevmJyhLQ7yMDw/exec") === 0) {
+        onError(new Error("Apps Script URL not configured yet."));
+        return;
+      }
+      jsonpCounter++;
+      var cbName = "jsonpCb" + jsonpCounter + "_" + Date.now();
+      var script = document.createElement("script");
+
+      var timeoutId = setTimeout(function(){
+        cleanup();
+        onError(new Error("Request timed out"));
+      }, 15000);
+
+      function cleanup(){
+        clearTimeout(timeoutId);
+        try { delete window[cbName]; } catch(e) { window[cbName] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[cbName] = function(data){
+        cleanup();
+        onSuccess(data);
+      };
+
+      var qs = Object.keys(params).map(function(k){
+        var v = params[k] === undefined || params[k] === null ? "" : params[k];
+        return encodeURIComponent(k) + "=" + encodeURIComponent(v);
+      }).join("&");
+
+      script.src = APPS_SCRIPT_URL + "?" + qs + "&callback=" + cbName;
+      script.onerror = function(){
+        cleanup();
+        onError(new Error("Network or script error"));
+      };
+      document.body.appendChild(script);
+    }
+    /* ====================================================================================================== */
+
+    function showScreen(name){
+      $("menu-screen").hidden = (name !== "menu");
+      $("in-screen").hidden = (name !== "in");
+      $("out-screen").hidden = (name !== "out");
+      if(name === 'in' || name === 'out') {
+        setStatus(name, "System ready. Tap the scanning card above.", "success");
+      }
+    }
+
+    function exitScreen(side){ showScreen('menu'); }
+
+    /* ============== LIVE BARCODE SCANNER (works here because this page runs outside Apps Script) ============== */
+    var activeSide = null;
+    var scannerRunning = false;
+    var detectionBuffer = [];
+
+    function startScanner(side){
+      if ($("scanner-modal").classList.contains("active")) return;
+
+      activeSide = side;
+      detectionBuffer = [];
+      $("scanner-status-text").innerText = "Point the camera at the barcode and hold steady";
+      $("scanner-modal").classList.add("active");
+
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector("#scanner-viewport"),
+          constraints: { facingMode: "environment" }
+        },
+        locator: { patchSize: "medium", halfSample: true },
+        numOfWorkers: 0,
+        locate: true,
+        decoder: {
+          readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "upc_reader"]
+        }
+      }, function(err){
+        if (err) {
+          console.error(err);
+          $("scanner-status-text").innerText = "Camera error — please allow camera access and try again.";
+          return;
+        }
+        Quagga.start();
+        scannerRunning = true;
+      });
+
+      Quagga.onDetected(onBarcodeDetected);
+    }
+
+    function onBarcodeDetected(result){
+      if (!scannerRunning) return;
+      var code = result.codeResult.code;
+
+      detectionBuffer.push(code);
+      if (detectionBuffer.length > 5) detectionBuffer.shift();
+
+      var lastThree = detectionBuffer.slice(-3);
+      if (lastThree.length === 3 && lastThree[0] === lastThree[1] && lastThree[1] === lastThree[2]) {
+        acceptScan(code);
+      } else {
+        $("scanner-status-text").innerText = "Reading: " + code + " …";
+      }
+    }
+
+    function acceptScan(code){
+      if (!scannerRunning) return;
+      scannerRunning = false;
+
+      if (navigator.vibrate) navigator.vibrate(120);
+
+      var side = activeSide;
+      $(side + "-barcode").value = code;
+      stopScanner();
+      setStatus(side, "Locked Code: " + code, "success");
+      lookupBarcode(side);
+    }
+
+    function stopScanner(){
+      scannerRunning = false;
+      try { Quagga.offDetected(onBarcodeDetected); } catch(e) {}
+      try { Quagga.stop(); } catch(e) {}
+      $("scanner-modal").classList.remove("active");
+      $("scanner-viewport").innerHTML = "";
+      activeSide = null;
+    }
+    /* ============================================================================================================== */
+
+    /* ============== PHOTO-CAPTURE FALLBACK ============== */
+    function triggerHardwareLens(side) {
+      $(side + "-lens").click();
+    }
+
+    var READERS = ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "upc_reader"];
+
+    var DECODE_ATTEMPTS = [
+      { inputStream: { size: 1280 }, locator: { patchSize: "medium",  halfSample: true  } },
+      { inputStream: { size: 1600 }, locator: { patchSize: "large",   halfSample: false } },
+      { inputStream: { size: 900  }, locator: { patchSize: "x-large", halfSample: false } }
+    ];
+
+    function decodeBarcodeFromImage(src, onDone) {
+      var i = 0;
+      function tryNext() {
+        if (i >= DECODE_ATTEMPTS.length) { onDone(null); return; }
+        var cfg = DECODE_ATTEMPTS[i];
+        i++;
+        Quagga.decodeSingle({
+          src: src,
+          locate: true,
+          inputStream: cfg.inputStream,
+          locator: cfg.locator,
+          decoder: { readers: READERS }
+        }, function(result) {
+          if (result && result.codeResult && result.codeResult.code) {
+            onDone(result.codeResult.code);
+          } else {
+            tryNext();
+          }
+        });
+      }
+      tryNext();
+    }
+
+    function processLensFrame(input, side) {
+      if (!input.files || input.files.length === 0) return;
+
+      setStatus(side, "Reading barcode from photo...", "");
+      var targetFile = input.files[0];
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        decodeBarcodeFromImage(e.target.result, function(scannedCode) {
+          if (scannedCode) {
+            $(side + "-barcode").value = scannedCode;
+            setStatus(side, "Locked Code: " + scannedCode, "success");
+            lookupBarcode(side);
+          } else {
+            setStatus(side, "Couldn't read that barcode. Hold it flat, fill more of the frame, avoid glare, then try again.", "error");
+          }
+          input.value = "";
+        });
+      };
+      reader.readAsDataURL(targetFile);
+    }
+    /* ====================================================== */
+
+    /* ============== BACKEND CALLS (Google Sheets via Apps Script JSONP API) ============== */
+    function lookupBarcode(side){
+      var barcode = $(side + "-barcode").value.trim();
+      if (!barcode) return;
+      $(side + "-product").placeholder = "Searching master datasheet...";
+
+      jsonpRequest({ action: "lookup", barcode: barcode }, function(res){
+        if (res && res.success && res.data) {
+          $(side + "-product").value = res.data.name;
+          $(side + "-category").value = res.data.category;
+        } else {
+          setStatus(side, "Barcode not listed in Product_Master.", "error");
+        }
+      }, function(err){
+        console.error(err);
+        setStatus(side, "Couldn't reach the server. Check your internet connection and the Apps Script URL.", "error");
+      });
+    }
+
+    function saveEntry(side){
+      var data = {
+        type: (side === "in") ? "IN" : "OUT",
+        barcode: $(side + "-barcode").value.trim(),
+        category: $(side + "-category").value.trim(),
+        product: $(side + "-product").value.trim(),
+        qty: Number($(side + "-qty").value)
+      };
+      if (!data.barcode || !data.product || data.qty <= 0) return setStatus(side, "Error: Fill all fields properly.", "error");
+
+      setStatus(side, "Writing data...", "");
+
+      var payload = { action: "save", type: data.type, barcode: data.barcode, category: data.category, product: data.product, qty: data.qty };
+
+      jsonpRequest(payload, function(res){
+        if (res && res.success) {
+          $(side + "-barcode").value = ""; $(side + "-product").value = ""; $(side + "-qty").value = "0";
+          setStatus(side, "Transaction logged successfully!", "success");
+          setTimeout(() => showScreen('menu'), 1000);
+        } else {
+          setStatus(side, "Save failed: " + (res && res.error ? res.error : "Unknown error"), "error");
+        }
+      }, function(err){
+        console.error(err);
+        setStatus(side, "Couldn't reach the server. Check your internet connection and the Apps Script URL.", "error");
+      });
+    }
+    /* ======================================================================================= */
+
+    function adjustQty(side, d){
+      var el = $(side + "-qty");
+      el.value = Math.max(0, (parseInt(el.value, 10) || 0) + d);
+    }
+
+    function setStatus(side, msg, type) { var el = $(side + "-status"); el.innerText = msg; el.className = "status " + type; }
+  </script>
+</body>
+</html>
