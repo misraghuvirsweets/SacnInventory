@@ -271,7 +271,7 @@
        Deploy Code.gs as a Web App with "Who has access: Anyone" first,
        then paste that deployment URL here.
        ===================================================================== */
-    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWuI1eHi8DMil_OLkMaM_wXq3i2KUksLk6w65xLMEUStfJbKLS44gZqW7zoYv-7BfZxA/exec";
+    var APPS_SCRIPT_URL = "https://script.google.com/a/macros/raghuvirsweets.co.in/s/AKfycbxWuI1eHi8DMil_OLkMaM_wXq3i2KUksLk6w65xLMEUStfJbKLS44gZqW7zoYv-7BfZxA/exec";
 
     /* ============== JSONP helper (talks to Google Sheets via Apps Script, no CORS issues) ============== */
     var jsonpCounter = 0;
@@ -356,10 +356,12 @@
         numOfWorkers: (navigator.hardwareConcurrency ? Math.min(4, navigator.hardwareConcurrency) : 2),
         locate: true,
         decoder: {
-          // Your barcodes are alphanumeric (e.g. "R643..."), so Code-39 and
-          // Code-128 are listed first. EAN/UPC are still included in case
-          // any products use standard retail barcodes too.
-          readers: ["code_128_reader", "code_39_reader", "ean_reader", "ean_8_reader", "upc_reader"]
+          // Your barcodes are alphanumeric (e.g. "R643..."). EAN/UPC readers
+          // were removed — they were occasionally misreading the same bar
+          // pattern as an unrelated numeric code, which is what caused the
+          // wrong numbers showing up. Fewer readers to check per frame also
+          // makes scanning noticeably faster.
+          readers: ["code_128_reader", "code_39_reader"]
         }
       }, function(err){
         if (err) {
