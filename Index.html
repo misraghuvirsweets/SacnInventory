@@ -271,12 +271,12 @@
        Deploy Code.gs as a Web App with "Who has access: Anyone" first,
        then paste that deployment URL here.
        ===================================================================== */
-    var APPS_SCRIPT_URL = "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWuI1eHi8DMil_OLkMaM_wXq3i2KUksLk6w65xLMEUStfJbKLS44gZqW7zoYv-7BfZxA/exec";
 
     /* ============== JSONP helper (talks to Google Sheets via Apps Script, no CORS issues) ============== */
     var jsonpCounter = 0;
     function jsonpRequest(params, onSuccess, onError) {
-      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("https://script.google.com/macros/s/AKfycbwyvvT4gepyO1GrJTJZUdFn6gwVviR5Ki6B2bZPReeW9wF1aP1-7qMDFevmJyhLQ7yMDw/exec") === 0) {
+      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === 0) {
         onError(new Error("Apps Script URL not configured yet."));
         return;
       }
