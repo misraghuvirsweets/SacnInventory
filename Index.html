@@ -356,11 +356,10 @@
         numOfWorkers: (navigator.hardwareConcurrency ? Math.min(4, navigator.hardwareConcurrency) : 2),
         locate: true,
         decoder: {
-          // Restricted to standard retail formats (EAN/UPC), which carry a
-          // built-in checksum digit — Quagga verifies it before returning a
-          // result, so wrong reads are far less likely than with code_39/128
-          // (which have no checksum and are more prone to live-camera misreads).
-          readers: ["ean_reader", "ean_8_reader", "upc_reader"]
+          // Your barcodes are alphanumeric (e.g. "R643..."), so Code-39 and
+          // Code-128 are listed first. EAN/UPC are still included in case
+          // any products use standard retail barcodes too.
+          readers: ["code_128_reader", "code_39_reader", "ean_reader", "ean_8_reader", "upc_reader"]
         }
       }, function(err){
         if (err) {
