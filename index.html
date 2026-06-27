@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Raghuvir Sweets — High Speed Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght=600&family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#F3EDE2;
+      --surface:#FFFFFF;
+      --text:#261E16;
+      --text-soft:#706254;
+      --border:#DFD2BF;
+      --green:#3D5E26;
+      --green-soft:#DFE8D5;
+      --terracotta:#A63C19;
+      --terracotta-soft:#F5DFD6;
+      --radius:16px;
+    }
+    *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html,body{ margin:0; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; }
+    .wrap{ max-width:480px; margin:0 auto; padding:18px 14px 40px; }
+
+    header{ text-align:center; margin-bottom:14px; }
+    header h1{ font-family:'Fraunces',serif; font-size:24px; font-weight:600; margin:0; color:var(--text); }
+    header p{ margin:3px 0 0; font-size:13px; color:var(--text-soft); font-weight: 500; }
+
+    #menu-screen{ display:flex; gap:12px; margin-top:10px; }
+    .menu-btn{
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:26px 10px; border:none; border-radius:var(--radius); cursor:pointer; color:#fff; flex:1;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.06); transition: all 0.2s;
+    }
+    .menu-btn.inward{ background:var(--green); }
+    .menu-btn.outward{ background:var(--terracotta); }
+    .menu-btn:active{ transform: scale(0.97); opacity:0.95; }
+    .menu-btn-title{ font-family:'Fraunces',serif; font-size:18px; font-weight:600; }
+
+    /* DASHBOARD PANEL CONTAINER */
+    .dashboard-panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.04); }
+    .panel-head{ display:flex; align-items:center; gap:8px; padding:14px 16px; font-family:'Fraunces',serif; font-size:18px; font-weight:600; border-bottom:1px solid var(--border); }
+    .dashboard-panel.inward .panel-head{ background:var(--green-soft); color:var(--green); }
+    .dashboard-panel.outward .panel-head{ background:var(--terracotta-soft); color:var(--terracotta); }
+    .back-btn{ border:none; background:none; font-size:22px; cursor:pointer; color:inherit; padding:2px 8px; font-weight: bold; }
+    .panel-body{ padding:16px; display:flex; flex-direction:column; gap:14px; }
+
+    /* BIG TAP TO SCAN CONTROL BUTTON */
+    .giant-scan-box {
+      width: 100%; padding: 28px 16px; text-align: center;
+      border: 2px dashed var(--border); border-radius: 12px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      transition: all 0.2s; background: #fff;
+    }
+    .giant-scan-box strong { font-size: 17px; letter-spacing: 0.02em; }
+    .giant-scan-box span { font-size: 12px; opacity: 0.8; }
+    .dashboard-panel.inward .giant-scan-box { color: var(--green); border-color: var(--green); background: var(--green-soft); }
+    .dashboard-panel.outward .giant-scan-box { color: var(--terracotta); border-color: var(--terracotta); background: var(--terracotta-soft); }
+    .giant-scan-box:active { transform: scale(0.96); }
+
+    /* SCANNED HISTORY PANEL CONTAINER */
+    .history-section-label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-soft); font-weight:700; margin-top: 4px; }
+    .history-scroll-box {
+      border: 1px solid var(--border); border-radius: 12px; background: #FAF7F2; 
+      max-height: 250px; overflow-y: auto; padding: 2px 12px;
+    }
+    .history-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13.5px; padding: 11px 0; border-bottom: 1px dashed var(--border);
+    }
+    .history-row:last-child { border-bottom: none; }
+    .history-left { display: flex; flex-direction: column; gap: 2px; }
+    .history-right { display: flex; align-items: center; gap: 12px; }
+    
+    /* ENTRY-WISE DELETE ACTION ICON BUTTON */
+    .history-delete-btn {
+      background: #F2E8DB; border: none; color: #9E2F11; font-size: 13px;
+      font-weight: 700; cursor: pointer; width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .history-delete-btn:active { background: #E5D6C3; transform: scale(0.88); }
+
+    /* MAIN TRANSACTION MASTER BUTTONS */
+    .master-submit-btn {
+      width: 100%; padding: 15px; border: none; border-radius: 10px; 
+      font-size: 15px; font-weight: 700; font-family: inherit; color: #fff; 
+      cursor: pointer; background: #261E16; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .master-submit-btn:active { opacity: 0.92; transform: translateY(1px); }
+    
+    .status-msg-bar{ min-height:18px; font-size:13px; font-weight: 600; text-align: center; }
+    .status-msg-bar.success{ color:var(--green); }
+    .status-msg-bar.error{ color:var(--terracotta); }
+
+    /* CAMERA VIEWFINDER FRAME MODAL OVERLAY */
+    #scanner-modal{ position:fixed; inset:0; background:#000; z-index:9999; display:none; }
+    #scanner-modal.active{ display:block; }
+    #scanner-viewport{ position:absolute; inset:0; overflow:hidden; }
+    #scanner-viewport video, #scanner-viewport canvas{
+      position:absolute; inset:0; width:100% !important; height:100% !important; object-fit:cover;
+    }
+    .scanner-topbar{
+      position:absolute; top:0; left:0; right:0; z-index:3; display:flex; align-items:center; justify-content:space-between;
+      padding:16px; background:linear-gradient(to bottom, rgba(0,0,0,0.5), transparent);
+    }
+    .scanner-cancel-action{
+      background:rgba(255,255,255,0.25); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-weight:600; font-size:13px; cursor:pointer;
+    }
+    .scanner-guide-box{
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:82%; max-width:350px; height:130px;
+      border:3px solid #528A33; border-radius:14px; box-shadow:0 0 0 2000px rgba(0,0,0,0.55); z-index:2; pointer-events:none;
+    }
+    .scanner-guide-box::after{
+      content:""; position:absolute; left:2%; right:2%; height:3px; background:#528A33; box-shadow:0 0 8px #528A33;
+      top:10%; animation:laserline 1.2s ease-in-out infinite;
+    }
+    @keyframes laserline{ 0% { top:10%; } 50% { top:90%; } 100% { top:10%; } }
+
+    /* QUANTITY ENTRY FLUID DASHBOARD DIALOG POPUP */
+    .dashboard-popup-backdrop {
+      position: fixed; inset: 0; background: rgba(20, 16, 12, 0.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    .dashboard-popup-backdrop.open { opacity: 1; pointer-events: auto; }
+    .dashboard-popup-card {
+      background: #FFFFFF; border: 1px solid var(--border); width: 100%; max-width: 360px;
+      border-radius: 20px; padding: 22px; box-shadow: 0 20px 45px rgba(0,0,0,0.2);
+      transform: scale(0.92); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+    }
+    .dashboard-popup-backdrop.open .dashboard-popup-card { transform: scale(1); }
+    .popup-item-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--text); margin: 0 0 4px 0; text-align: center; }
+    .popup-item-category { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-soft); text-align: center; font-weight: 700; margin-bottom: 18px; }
+    
+    .popup-input-container { background: #FCFAF6; border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 20px; }
+    .popup-input-container label { display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-soft); text-align: center; margin-bottom: 4px; }
+    .popup-input-field { width: 100%; padding: 4px; font-size: 26px; font-weight: 700; border: none; background: transparent; text-align: center; color: var(--text); outline: none; font-family: inherit; }
+    
+    .popup-action-row { display: flex; gap: 10px; }
+    .popup-action-btn { flex: 1; padding: 13px; border: none; border-radius: 10px; font-size: 14.5px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: center; }
+    .popup-action-btn.cancel { background: #EFE9DE; color: var(--text); }
+    .popup-action-btn.add-next { background: #261E16; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Raghuvir Sweets</h1>
+        <p>Speed Dashboard Counter Desk</p>
+      </div>
+    </header>
+
+    <div id="menu-screen">
+      <button class="menu-btn inward" type="button" onclick="openDashboardScreen('in')">
+        <span class="menu-btn-title">Production (PROD)</span>
+      </button>
+      <button class="menu-btn outward" type="button" onclick="openDashboardScreen('out')">
+        <span class="menu-btn-title">Dispatch (DISP)</span>
+      </button>
+    </div>
+
+    <div id="desk-dashboard" class="dashboard-panel" hidden>
+      <div class="panel-head">
+        <button class="back-btn" type="button" onclick="exitDashboardScreen()">←</button>
+        <span id="dashboard-title-label">Dashboard Desk</span>
+      </div>
+      
+      <div class="panel-body">
+        <div class="giant-scan-box" onclick="triggerLiveScanner()">
+          <strong>⚡ TAP TO SCAN BARCODE</strong>
+          <span>Camera viewfinder opens automatically</span>
+        </div>
+
+        <div style="margin-top: 2px;">
+          <label class="history-section-label">Scanned Items History Log</label>
+          <div id="dashboard-history-scroll" class="history-scroll-box">No entries in batch yet.</div>
+        </div>
+
+        <button class="master-submit-btn" type="button" onclick="submitEntireDeskBatch()">🚀 Confirm & Final Submit Batch</button>
+        
+        <div id="dashboard-status-log" class="status-msg-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="scanner-modal">
+    <div id="scanner-viewport"></div>
+    <div class="scanner-topbar">
+      <span style="color:#fff; font-size:15px; font-weight:600;">Scanning Active Grid...</span>
+      <button class="scanner-cancel-action" type="button" onclick="terminateLiveScanner()">✕ Close</button>
+    </div>
+    <div class="scanner-guide-box"></div>
+  </div>
+
+  <div id="dashboard-popup-backdrop" class="dashboard-popup-backdrop">
+    <div class="dashboard-popup-card">
+      <h3 id="pop-product-name" class="popup-item-title">Product Description</h3>
+      <div id="pop-product-cat" class="popup-item-category">Bakery</div>
+      
+      <div class="popup-input-container">
+        <label>Enter Quantity Count</label>
+        <input id="pop-qty-input" class="popup-input-field" type="number" step="any" value="1">
+      </div>
+
+      <div class="popup-action-row">
+        <button class="popup-action-btn cancel" type="button" onclick="closeDashboardPopupCard(false)">Cancel</button>
+        <button class="popup-action-btn add-next" type="button" onclick="closeDashboardPopupCard(true)">➕ ADD & NEXT SCAN</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+  <script>
+    function $(id){ return document.getElementById(id); }
+
+    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWuI1eHi8DMil_OLkMaM_wXq3i2KUksLk6w65xLMEUStfJbKLS44gZqW7zoYv-7BfZxA/exec";
+
+    var currentActiveMode = null; // 'in' or 'out'
+    var centralBatchCollection = []; 
+    var currentScannedPayload = null; 
+
+    /* ============== JSONP ENGINE FOR WEB APPLICATIONS ============== */
+    var jsonpCounter = 0;
+    function executeJsonpTransfer(params, successCallback, failureCallback) {
+      jsonpCounter++;
+      var cbName = "jsonpCallback_" + jsonpCounter + "_" + Date.now();
+      var scriptElement = document.createElement("script");
+      var networkTimeout = setTimeout(function(){ removeScript(); failureCallback(new Error("Timeout")); }, 15000);
+
+      function removeScript(){
+        clearTimeout(networkTimeout);
+        try { delete window[cbName]; } catch(e) { window[cbName] = undefined; }
+        if (scriptElement.parentNode) scriptElement.parentNode.removeChild(scriptElement);
+      }
+      window[cbName] = function(data){ removeScript(); successCallback(data); };
+      var queryParams = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join("&");
+      scriptElement.src = APPS_SCRIPT_URL + "?" + queryParams + "&callback=" + cbName;
+      scriptElement.onerror = function(){ removeScript(); failureCallback(new Error("Network Error")); };
+      document.body.appendChild(scriptElement);
+    }
+
+    /* ============== DASHBOARD NAVIGATION ENGINE ============== */
+    function openDashboardScreen(mode) {
+      currentActiveMode = mode;
+      centralBatchCollection = [];
+      $("menu-screen").hidden = true;
+      $("desk-dashboard").hidden = false;
+      $("desk-dashboard").className = "dashboard-panel " + (mode === "in" ? "inward" : "outward");
+      $("dashboard-title-label").innerText = mode === "in" ? "Production Dashboard Unit" : "Dispatch Dashboard Unit";
+      
+      refreshHistoryLogDisplay();
+      setLogStatus("Dashboard Workspace Initiated.", "success");
+    }
+
+    function exitDashboardScreen() {
+      currentActiveMode = null;
+      centralBatchCollection = [];
+      $("desk-dashboard").hidden = true;
+      $("menu-screen").hidden = false;
+    }
+
+    /* ============== HISTORY GRID CONTROLLER WITH INDIVIDUAL DELETE ============== */
+    function deleteRowEntryItem(index) {
+      centralBatchCollection.splice(index, 1);
+      refreshHistoryLogDisplay();
+      setLogStatus("Selected row entry item removed successfully.", "success");
+    }
+
+    function refreshHistoryLogDisplay() {
+      var scrollBox = $("dashboard-history-scroll");
+      if (centralBatchCollection.length === 0) {
+        scrollBox.innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">No entries logged in current batch workspace yet.</div>';
+        return;
+      }
+
+      var htmlRowsGrid = "";
+      for (var i = 0; i < centralBatchCollection.length; i++) {
+        var entry = centralBatchCollection[i];
+        htmlRowsGrid += `
+          <div class="history-row">
+            <div class="history-left">
+              <strong style="color:var(--text); font-size:14px;">${entry.product}</strong>
+              <span style="color:var(--text-soft); font-size:11px;">Code: ${entry.barcode} | ${entry.category}</span>
+            </div>
+            <div class="history-right">
+              <span style="font-weight:700; color:var(--text); font-size:14px; background:#F2E8DB; padding:4px 8px; border-radius:6px;">x${entry.qty}</span>
+              <button class="history-delete-btn" type="button" onclick="deleteRowEntryItem(${i})">✕</button>
+            </div>
+          </div>`;
+      }
+      scrollBox.innerHTML = htmlRowsGrid;
+    }
+
+    /* ============== BARCODE CAM CONTROL MATRICES (HIGH-SPEED) ============== */
+    var scannerRunning = false;
+    var trackingSequence = [];
+    var mediaStreamInstance = null;
+    var nativeDetectorObject = null;
+    var nativeLoopActive = false;
+    var DETECT_READERS = ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "code_39_reader"];
+
+    function triggerLiveScanner() {
+      if ($("scanner-modal").classList.contains("active")) return;
+      trackingSequence = [];
+      $("scanner-modal").classList.add("active");
+
+      if ("BarcodeDetector" in window) startNativeCameraScanner(); else startQuaggaFallbackScanner();
+    }
+
+    async function startNativeCameraScanner() {
+      try { nativeDetectorObject = new BarcodeDetector({ formats: ["code_128", "code_39", "ean_13", "ean_8", "upc_a"] }); } catch(e){}
+      try {
+        mediaStreamInstance = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } });
+      } catch (err) { startQuaggaFallbackScanner(); return; }
+
+      var liveVideo = document.createElement("video");
+      liveVideo.setAttribute("playsinline", ""); liveVideo.muted = true; liveVideo.srcObject = mediaStreamInstance;
+      $("scanner-viewport").innerHTML = ""; $("scanner-viewport").appendChild(liveVideo);
+      try { await liveVideo.play(); } catch(e){}
+
+      scannerRunning = true; nativeLoopActive = true;
+      nativeExtractionLoop(liveVideo);
+    }
+
+    async function nativeExtractionLoop(videoElement) {
+      while (nativeLoopActive) {
+        try {
+          var codesFound = await nativeDetectorObject.detect(videoElement);
+          if (codesFound && codesFound.length > 0 && codesFound[0].rawValue) {
+            evaluateIncomingScannedCode(codesFound[0].rawValue); return;
+          }
+        } catch (e) {}
+        await new Promise(r => setTimeout(r, 60));
+      }
+    }
+
+    function startQuaggaFallbackScanner() {
+      Quagga.init({
+        inputStream: { name: "Live", type: "LiveStream", target: document.querySelector("#scanner-viewport"), constraints: { facingMode: "environment", width: 1280, height: 720 } },
+        locator: { patchSize: "medium", halfSample: false, area: { top: "15%", right: "5%", left: "5%", bottom: "15%" } },
+        decoder: { readers: DETECT_READERS }
+      }, function(err){ if(!err) { Quagga.start(); scannerRunning = true; } });
+      Quagga.onDetected(onQuaggaFrameHit);
+    }
+
+    function onQuaggaFrameHit(resultData) {
+      if (!scannerRunning) return;
+      var rawStringCode = resultData.codeResult.code;
+      if (!rawStringCode || rawStringCode.length < 4) return;
+      
+      trackingSequence.push(rawStringCode);
+      if (trackingSequence.length > 2) trackingSequence.shift();
+      if (trackingSequence.length === 2 && trackingSequence[0] === trackingSequence[1]) evaluateIncomingScannedCode(rawStringCode);
+    }
+
+    function terminateLiveScanner() {
+      scannerRunning = false; nativeLoopActive = false;
+      if (mediaStreamInstance) { try { mediaStreamInstance.getTracks().forEach(t => t.stop()); } catch(e){} mediaStreamInstance = null; }
+      try { Quagga.offDetected(onQuaggaFrameHit); Quagga.stop(); } catch(e){}
+      $("scanner-modal").classList.remove("active");
+    }
+
+    /* ============== HIGH-SPEED BARCODE INTERPRETATION MATRIX ============== */
+    function evaluateIncomingScannedCode(codeString) {
+      if (!scannerRunning) return;
+      scannerRunning = false;
+      if (navigator.vibrate) navigator.vibrate(65);
+
+      var parsedBarcode = codeString;
+      var isolatedWeightVal = 0;
+      var isWeightScaleBarcode = false;
+
+      if (codeString.length > 4) {
+        parsedBarcode = codeString.substring(0, 4);
+        var subWeightStr = codeString.substring(4);
+        isolatedWeightVal = parseFloat(subWeightStr) || 0;
+        if (isolatedWeightVal > 0) isWeightScaleBarcode = true;
+      }
+
+      terminateLiveScanner();
+      setLogStatus("Searching core ledger for code: " + parsedBarcode, "");
+
+      currentScannedPayload = { barcode: parsedBarcode, qty: isolatedWeightVal, isWeight: isWeightScaleBarcode };
+      
+      executeJsonpTransfer({ action: "lookup", barcode: parsedBarcode }, function(response){
+        if (response && response.success && response.data) {
+          currentScannedPayload.product = response.data.name;
+          currentScannedPayload.category = response.data.category;
+          
+          processNextWorkflowStep();
+        } else {
+          setLogStatus("Product code not listed inside master database sheets.", "error");
+        }
+      }, function(err){ setLogStatus("Database server response failed.", "error"); });
+    }
+
+    /* ============== FLOW PROCESSOR MATRIX ============== */
+    function processNextWorkflowStep() {
+      if (currentScannedPayload.isWeight) {
+        // WEIGHT DETECTED BARCODE — BYPASS ALL DURATION POPUPS, LOG DIRECTLY INTO WORKSPACE HISTORY
+        commitPayloadEntryToStaging(currentScannedPayload.qty);
+        
+        // IMMEDIATE RE-LAUNCH SCREEN CAMERA EYE GRID FAST FOR SPEED RUNNING
+        setTimeout(function() { triggerLiveScanner(); }, 250);
+      } else {
+        // NORMAL BARCODE — SHOW ELEGANT DASHBOARD POPUP CARD
+        $("pop-product-name").innerText = currentScannedPayload.product;
+        $("pop-product-cat").innerText = currentScannedPayload.category;
+        $("pop-qty-input").value = "1";
+        
+        $("dashboard-popup-backdrop").classList.add("open");
+        setTimeout(() => $("pop-qty-input").focus(), 150);
+      }
+    }
+
+    function closeDashboardPopupCard(shouldSaveEntry) {
+      $("dashboard-popup-backdrop").classList.remove("open");
+      
+      if (shouldSaveEntry) {
+        var userTypedQty = parseFloat($("pop-qty-input").value);
+        if (!isNaN(userTypedQty) && userTypedQty > 0) {
+          commitPayloadEntryToStaging(userTypedQty);
+          // ➕ ADD & NEXT SCAN FLOW TRIPPED: IMMEDIATE SCANNER RE-OPEN AT HIGH VELOCITY
+          setTimeout(function() { triggerLiveScanner(); }, 250);
+        } else {
+          setLogStatus("Error: Discarded due to missing quantity records values.", "error");
+        }
+      }
+    }
+
+    function commitPayloadEntryToStaging(quantityToLog) {
+      var itemObject = {
+        type: (currentActiveMode === "in") ? "PRODUCTION" : "DISPATCH",
+        barcode: currentScannedPayload.barcode,
+        category: currentScannedPayload.category,
+        product: currentScannedPayload.product,
+        qty: quantityToLog
+      };
+
+      centralBatchCollection.push(itemObject);
+      refreshHistoryLogDisplay();
+      setLogStatus("Added into Workspace: " + itemObject.product, "success");
+    }
+
+    /* ============== FINAL TRANSMISSION DISPATCH DATA ============== */
+    function submitEntireDeskBatch() {
+      if (centralBatchCollection.length === 0) {
+        setLogStatus("Staging batch history environment ledger is empty.", "error");
+        return;
+      }
+
+      if (!confirm("Are you sure you want to push this total transaction batch array containing " + centralBatchCollection.length + " logged line items?")) return;
+
+      setLogStatus("Uploading records payload package to Cloud Sheets server...", "");
+      var serializedBatch = JSON.stringify(centralBatchCollection);
+
+      executeJsonpTransfer({ action: "saveBatch", batch: serializedBatch }, function(res){
+        if (res && res.success) {
+          alert("All entries pushed successfully!");
+          centralBatchCollection = [];
+          refreshHistoryLogDisplay();
+          exitDashboardScreen();
+        } else {
+          setLogStatus("Database server execution process breakdown occurred.", "error");
+        }
+      }, function(e){ setLogStatus("Cloud submission pipeline connection timeout.", "error"); });
+    }
+
+    function setLogStatus(msg, classification) {
+      var bar = $("dashboard-status-log");
+      if(!bar) return;
+      bar.innerText = msg;
+      bar.className = "status-msg-bar " + classification;
+    }
+  </script>
+</body>
+</html>
