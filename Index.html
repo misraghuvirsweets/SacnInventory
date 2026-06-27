@@ -146,6 +146,25 @@
       background:linear-gradient(to top, rgba(0,0,0,0.55), transparent);
       padding-top:40px;
     }
+
+    /* ===== BATCH PREVIEW CONTAINER ===== */
+    .batch-preview-box {
+      margin-top: 12px;
+      padding: 10px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: #fafafa;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .batch-item-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      padding: 4px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .batch-item-row:last-child { border-bottom: none; }
   </style>
 </head>
 <body>
@@ -160,17 +179,17 @@
 
     <div id="menu-screen">
       <button class="menu-btn inward" type="button" onclick="showScreen('in')">
-        <span class="menu-btn-title">Inward (IN)</span>
+        <span class="menu-btn-title">Production (PROD)</span>
       </button>
       <button class="menu-btn outward" type="button" onclick="showScreen('out')">
-        <span class="menu-btn-title">Outward (OUT)</span>
+        <span class="menu-btn-title">Dispatch (DISP)</span>
       </button>
     </div>
 
     <div id="in-screen" class="panel inward" hidden>
       <div class="panel-head">
         <button class="back-btn" type="button" onclick="exitScreen('in')">←</button>
-        <span>Inward Unit</span>
+        <span>Production Unit</span>
       </div>
       <div class="panel-body">
 
@@ -197,14 +216,22 @@
           <input id="in-product" type="text" placeholder="Product Name" disabled>
         </div>
         <div class="field">
-          <label>Quantity</label>
+          <label>Quantity / Weight</label>
           <div class="qty-row">
             <button class="qty-btn" type="button" onclick="adjustQty('in',-1)">−</button>
-            <input id="in-qty" type="number" min="0" value="0">
+            <input id="in-qty" type="number" min="0" step="any" value="0">
             <button class="qty-btn" type="button" onclick="adjustQty('in',1)">+</button>
           </div>
         </div>
-        <button class="save-btn" type="button" onclick="saveEntry('in')">Save Inward</button>
+
+        <button class="save-btn" type="button" onclick="stageScannedItem('in')">Add to Batch Queue</button>
+        
+        <div class="field" style="margin-top: 8px;">
+          <label>Items in current batch queue</label>
+          <div id="in-batch-preview" class="batch-preview-box">No scanned items staged yet.</div>
+        </div>
+
+        <button class="save-btn" style="background-color: #2b2118 !important;" type="button" onclick="submitEntireBatch('in')">Confirm & Submit Batch</button>
         <div id="in-status" class="status"></div>
       </div>
     </div>
@@ -212,7 +239,7 @@
     <div id="out-screen" class="panel outward" hidden>
       <div class="panel-head">
         <button class="back-btn" type="button" onclick="exitScreen('out')">←</button>
-        <span>Outward Unit</span>
+        <span>Dispatch Unit</span>
       </div>
       <div class="panel-body">
 
@@ -239,14 +266,22 @@
           <input id="out-product" type="text" placeholder="Product Name" disabled>
         </div>
         <div class="field">
-          <label>Quantity</label>
+          <label>Quantity / Weight</label>
           <div class="qty-row">
             <button class="qty-btn" type="button" onclick="adjustQty('out',-1)">−</button>
-            <input id="out-qty" type="number" min="0" value="0">
+            <input id="out-qty" type="number" min="0" step="any" value="0">
             <button class="qty-btn" type="button" onclick="adjustQty('out',1)">+</button>
           </div>
         </div>
-        <button class="save-btn" type="button" onclick="saveEntry('out')">Save Outward</button>
+
+        <button class="save-btn" type="button" onclick="stageScannedItem('out')">Add to Batch Queue</button>
+
+        <div class="field" style="margin-top: 8px;">
+          <label>Items in current batch queue</label>
+          <div id="out-batch-preview" class="batch-preview-box">No scanned items staged yet.</div>
+        </div>
+
+        <button class="save-btn" style="background-color: #2b2118 !important;" type="button" onclick="submitEntireBatch('out')">Confirm & Submit Batch</button>
         <div id="out-status" class="status"></div>
       </div>
     </div>
@@ -266,10 +301,10 @@
   <script>
     function $(id){ return document.getElementById(id); }
 
-    /* =====================================================================
-       PASTE YOUR APPS SCRIPT WEB APP URL BELOW (must end in /exec).
-       ===================================================================== */
     var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWuI1eHi8DMil_OLkMaM_wXq3i2KUksLk6w65xLMEUStfJbKLS44gZqW7zoYv-7BfZxA/exec";
+
+    var productionBatchQueue = [];
+    var dispatchBatchQueue = [];
 
     /* ============== JSONP helper ============== */
     var jsonpCounter = 0;
@@ -317,6 +352,7 @@
       $("out-screen").hidden = (name !== "out");
       if(name === 'in' || name === 'out') {
         resetFormFields(name);
+        clearBatchQueue(name);
         setStatus(name, "System ready. Tap the scanning card above.", "success");
       }
     }
@@ -330,6 +366,15 @@
       $(side + "-product").disabled = true;
       $(side + "-category").value = "";
       $(side + "-qty").value = "0";
+    }
+
+    function clearBatchQueue(side) {
+      if (side === "in") {
+        productionBatchQueue = [];
+      } else {
+        dispatchBatchQueue = [];
+      }
+      updateBatchPreviewDisplay(side);
     }
 
     /* ============== LIVE BARCODE SCANNER ============== */
@@ -458,10 +503,23 @@
       if (navigator.vibrate) navigator.vibrate(120);
 
       var side = activeSide;
-      $(side + "-barcode").value = code;
+      var finalBarcode = code;
+      var extractedWeight = 0;
+
+      // Alphanumeric Logic: If input is like R20400540 (Length > 4)
+      if (code.length > 4) {
+        finalBarcode = code.substring(0, 4); // Parsed product identification code -> R204
+        var weightPart = code.substring(4); // Dynamic string sequence component -> 00540
+        extractedWeight = parseFloat(weightPart) || 0; // Parsed direct payload float -> 540
+      }
+
+      $(side + "-barcode").value = finalBarcode;
+      $(side + "-qty").value = extractedWeight;
+
       stopScanner();
-      setStatus(side, "Locked Code: " + code, "success");
-      lookupBarcode(side);
+      setStatus(side, "Locked Code: " + finalBarcode, "success");
+      
+      lookupBarcodeAndProcess(side, extractedWeight > 0);
     }
 
     function stopScanner(){
@@ -524,9 +582,19 @@
       reader.onload = function(e) {
         decodeBarcodeFromImage(e.target.result, function(scannedCode) {
           if (scannedCode) {
-            $(side + "-barcode").value = scannedCode;
-            setStatus(side, "Locked Code: " + scannedCode, "success");
-            lookupBarcode(side);
+            var finalBarcode = scannedCode;
+            var extractedWeight = 0;
+
+            if (scannedCode.length > 4) {
+              finalBarcode = scannedCode.substring(0, 4);
+              var weightPart = scannedCode.substring(4);
+              extractedWeight = parseFloat(weightPart) || 0;
+            }
+
+            $(side + "-barcode").value = finalBarcode;
+            $(side + "-qty").value = extractedWeight;
+            setStatus(side, "Locked Code: " + finalBarcode, "success");
+            lookupBarcodeAndProcess(side, extractedWeight > 0);
           } else {
             setStatus(side, "Couldn't read barcode. Try to avoid camera glare.", "error");
           }
@@ -536,8 +604,12 @@
       reader.readAsDataURL(targetFile);
     }
 
-    /* ============== BACKEND CALLS ============== */
-    function lookupBarcode(side){
+    /* ============== BACKEND CALLS & STAGING OPERATIONS ============== */
+    function lookupBarcode(side) {
+      lookupBarcodeAndProcess(side, false);
+    }
+
+    function lookupBarcodeAndProcess(side, isWeightPreParsed) {
       var barcode = $(side + "-barcode").value.trim();
       if (!barcode) return;
       
@@ -551,6 +623,8 @@
           $(side + "-category").value = res.data.category;
           $(side + "-product").disabled = true; 
           setStatus(side, "Product matched!", "success");
+          
+          handlePostScanWorkflow(side, isWeightPreParsed);
         } else {
           $(side + "-product").disabled = false;
           $(side + "-product").value = "";
@@ -564,40 +638,109 @@
       });
     }
 
-    function saveEntry(side){
-      var data = {
-        type: (side === "in") ? "IN" : "OUT",
-        barcode: $(side + "-barcode").value.trim(),
-        category: $(side + "-category").value.trim(),
-        product: $(side + "-product").value.trim(),
-        qty: Number($(side + "-qty").value)
-      };
-      
-      if (!data.barcode || !data.product || data.qty <= 0) {
-        return setStatus(side, "Error: Fill all fields properly. Qty must be > 0.", "error");
+    function handlePostScanWorkflow(side, isWeightPreParsed) {
+      if (!isWeightPreParsed) {
+        // Standard code layout prompt loop execution
+        var userQty = prompt("Enter Quantity for " + $(side + "-product").value + ":", "1");
+        if (userQty !== null) {
+          var cleanQty = parseFloat(userQty);
+          if (!isNaN(cleanQty) && cleanQty > 0) {
+            $(side + "-qty").value = cleanQty;
+            stageScannedItem(side);
+            setTimeout(function() { startScanner(side); }, 400);
+          } else {
+            alert("Invalid quantity dropped. Object skipped from batch queue registration.");
+          }
+        }
+      } else {
+        // Auto-extract weight scenario matched (e.g. 540 gm pulled directly). Automatically added to batch queue.
+        stageScannedItem(side);
+        setTimeout(function() { startScanner(side); }, 400);
+      }
+    }
+
+    function stageScannedItem(side) {
+      var barcode = $(side + "-barcode").value.trim();
+      var category = $(side + "-category").value.trim();
+      var product = $(side + "-product").value.trim();
+      var qty = parseFloat($(side + "-qty").value);
+
+      if (!barcode || !product || isNaN(qty) || qty <= 0) {
+        setStatus(side, "Error: Staging target items missing validation contexts.", "error");
+        return;
       }
 
-      setStatus(side, "Writing data...", "");
+      var itemObject = {
+        type: (side === "in") ? "PRODUCTION" : "DISPATCH",
+        barcode: barcode,
+        category: category,
+        product: product,
+        qty: qty
+      };
 
-      var payload = { action: "save", type: data.type, barcode: data.barcode, category: data.category, product: data.product, qty: data.qty };
+      if (side === "in") {
+        productionBatchQueue.push(itemObject);
+      } else {
+        dispatchBatchQueue.push(itemObject);
+      }
 
-      jsonpRequest(payload, function(res){
+      updateBatchPreviewDisplay(side);
+      setStatus(side, "Item successfully added to active batch queue!", "success");
+      resetFormFields(side);
+    }
+
+    function updateBatchPreviewDisplay(side) {
+      var targetQueue = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
+      var targetDiv = $(side + "-batch-preview");
+
+      if (targetQueue.length === 0) {
+        targetDiv.innerHTML = "No scanned items staged yet.";
+        return;
+      }
+
+      var htmlOutput = "";
+      for (var i = 0; i < targetQueue.length; i++) {
+        var record = targetQueue[i];
+        htmlOutput += "<div class='batch-item-row'>" +
+                        "<span>" + record.product + " (x" + record.qty + ")</span>" +
+                        "<span style='color: var(--text-soft); font-family: monospace;'>" + record.barcode + "</span>" +
+                      "</div>";
+      }
+      targetDiv.innerHTML = htmlOutput;
+    }
+
+    function submitEntireBatch(side) {
+      var targetQueue = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
+
+      if (targetQueue.length === 0) {
+        return setStatus(side, "Error: Transaction workspace is empty. Scan items first.", "error");
+      }
+
+      var verification = confirm("Are you sure you want to finalize and submit this batch of " + targetQueue.length + " item(s)?");
+      if (!verification) return;
+
+      setStatus(side, "Uploading entire batch data logs to sheets...", "");
+
+      var payloadString = JSON.stringify(targetQueue);
+
+      jsonpRequest({ action: "saveBatch", batch: payloadString }, function(res){
         if (res && res.success) {
-          setStatus(side, "Transaction logged successfully!", "success");
-          resetFormFields(side);
-          setTimeout(() => showScreen('menu'), 1200);
+          setStatus(side, "Batch logged successfully inside datasheet ledger!", "success");
+          clearBatchQueue(side);
+          setTimeout(() => showScreen('menu'), 1500);
         } else {
-          setStatus(side, "Save failed: " + (res && res.error ? res.error : "Unknown error"), "error");
+          setStatus(side, "Batch push failure: " + (res && res.error ? res.error : "Unknown context error"), "error");
         }
       }, function(err){
         console.error(err);
-        setStatus(side, "Server timeout error while writing entry.", "error");
+        setStatus(side, "Server timeout error encountered during pipeline data delivery.", "error");
       });
     }
 
     function adjustQty(side, d){
       var el = $(side + "-qty");
-      el.value = Math.max(0, (parseInt(el.value, 10) || 0) + d);
+      var currentVal = parseFloat(el.value) || 0;
+      el.value = Math.max(0, currentVal + d);
     }
 
     function setStatus(side, msg, type) { 
