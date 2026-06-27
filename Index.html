@@ -133,14 +133,16 @@
     .popup-item-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--text); margin: 0 0 4px 0; text-align: center; }
     .popup-item-category { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-soft); text-align: center; font-weight: 700; margin-bottom: 18px; }
     
-    .popup-input-container { background: #FCFAF6; border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 20px; }
+    .popup-input-container { background: #FCFAF6; border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 16px; }
     .popup-input-container label { display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-soft); text-align: center; margin-bottom: 4px; }
     .popup-input-field { width: 100%; padding: 4px; font-size: 26px; font-weight: 700; border: none; background: transparent; text-align: center; color: var(--text); outline: none; font-family: inherit; }
     
-    .popup-action-row { display: flex; gap: 10px; }
-    .popup-action-btn { flex: 1; padding: 13px; border: none; border-radius: 10px; font-size: 14.5px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: center; }
-    .popup-action-btn.cancel { background: #EFE9DE; color: var(--text); }
-    .popup-action-btn.add-next { background: #261E16; color: #fff; }
+    .popup-action-column { display: flex; flex-direction: column; gap: 10px; }
+    .popup-action-row-top { display: flex; gap: 10px; }
+    .popup-action-btn { padding: 13px; border: none; border-radius: 10px; font-size: 14.5px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: center; }
+    .popup-action-btn.cancel { flex: 1; background: #EFE9DE; color: var(--text); }
+    .popup-action-btn.add-next { flex: 1; background: #261E16; color: #fff; }
+    .popup-action-btn.done { width: 100%; background: #3D5E26; color: #fff; }
   </style>
 </head>
 <body>
@@ -204,9 +206,12 @@
         <input id="pop-qty-input" class="popup-input-field" type="number" step="any" value="1">
       </div>
 
-      <div class="popup-action-row">
-        <button class="popup-action-btn cancel" type="button" onclick="closeDashboardPopupCard(false)">Cancel</button>
-        <button class="popup-action-btn add-next" type="button" onclick="closeDashboardPopupCard(true)">➕ ADD & NEXT SCAN</button>
+      <div class="popup-action-column">
+        <div class="popup-action-row-top">
+          <button class="popup-action-btn cancel" type="button" onclick="closeDashboardPopupCard('cancel')">Cancel</button>
+          <button class="popup-action-btn add-next" type="button" onclick="closeDashboardPopupCard('add_next')">➕ ADD & NEXT SCAN</button>
+        </div>
+        <button class="popup-action-btn done" type="button" onclick="closeDashboardPopupCard('done')">✔️ DONE</button>
       </div>
     </div>
   </div>
@@ -217,7 +222,7 @@
 
     var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWuI1eHi8DMil_OLkMaM_wXq3i2KUksLk6w65xLMEUStfJbKLS44gZqW7zoYv-7BfZxA/exec";
 
-    var currentActiveMode = null; // 'in' or 'out'
+    var currentActiveMode = null; 
     var centralBatchCollection = []; 
     var currentScannedPayload = null; 
 
@@ -380,53 +385,80 @@
       }
 
       terminateLiveScanner();
-      setLogStatus("Searching core ledger for code: " + parsedBarcode, "");
 
-      currentScannedPayload = { barcode: parsedBarcode, qty: isolatedWeightVal, isWeight: isWeightScaleBarcode };
-      
+      // INITIALIZE PAYLOAD PACK OBJECT WITH DEFAULT PRE-EMPTIVE DATA
+      currentScannedPayload = { 
+        barcode: parsedBarcode, 
+        qty: isolatedWeightVal, 
+        isWeight: isWeightScaleBarcode,
+        product: "Code: " + parsedBarcode, // Faster Placeholder
+        category: "Loading Details..." 
+      };
+
+      // **SPEED OPTIMIZATION**: OPEN POPUP INSTANTLY FOR NORMAL BARCODES WITHOUT WAITING FOR SHEET LOOKUP
+      if (!isWeightScaleBarcode) {
+        $("pop-product-name").innerText = currentScannedPayload.product;
+        $("pop-product-cat").innerText = currentScannedPayload.category;
+        $("pop-qty-input").value = "1";
+        $("dashboard-popup-backdrop").classList.add("open");
+        setTimeout(() => $("pop-qty-input").focus(), 100);
+      }
+
+      // ASYNC SHEET LOOKUP RUNNING IN BACKGROUND TO UPDATE DETAILS FLUIDLY
       executeJsonpTransfer({ action: "lookup", barcode: parsedBarcode }, function(response){
         if (response && response.success && response.data) {
           currentScannedPayload.product = response.data.name;
           currentScannedPayload.category = response.data.category;
           
-          processNextWorkflowStep();
+          if (isWeightScaleBarcode) {
+            // WEIGHT BARCODE WORKFLOW - AUTO COMMIT IMMEDIATELY
+            commitPayloadEntryToStaging(currentScannedPayload.qty);
+            setTimeout(function() { triggerLiveScanner(); }, 250);
+          } else {
+            // ACTIVE POP-UP CURRENTLY OPEN UPDATES LABELS IN REAL-TIME FLUIDLY
+            $("pop-product-name").innerText = response.data.name;
+            $("pop-product-cat").innerText = response.data.category;
+          }
         } else {
-          setLogStatus("Product code not listed inside master database sheets.", "error");
+          if (!isWeightScaleBarcode) {
+            $("pop-product-name").innerText = "New Item (" + parsedBarcode + ")";
+            $("pop-product-cat").innerText = "Not Found";
+          } else {
+            currentScannedPayload.product = "Unknown Weight Item (" + parsedBarcode + ")";
+            currentScannedPayload.category = "Master Missing";
+            commitPayloadEntryToStaging(currentScannedPayload.qty);
+            setTimeout(function() { triggerLiveScanner(); }, 250);
+          }
         }
-      }, function(err){ setLogStatus("Database server response failed.", "error"); });
+      }, function(err){
+        setLogStatus("Core lookup backend pipeline delay.", "error");
+      });
     }
 
-    /* ============== FLOW PROCESSOR MATRIX ============== */
-    function processNextWorkflowStep() {
-      if (currentScannedPayload.isWeight) {
-        // WEIGHT DETECTED BARCODE — BYPASS ALL DURATION POPUPS, LOG DIRECTLY INTO WORKSPACE HISTORY
-        commitPayloadEntryToStaging(currentScannedPayload.qty);
-        
-        // IMMEDIATE RE-LAUNCH SCREEN CAMERA EYE GRID FAST FOR SPEED RUNNING
-        setTimeout(function() { triggerLiveScanner(); }, 250);
-      } else {
-        // NORMAL BARCODE — SHOW ELEGANT DASHBOARD POPUP CARD
-        $("pop-product-name").innerText = currentScannedPayload.product;
-        $("pop-product-cat").innerText = currentScannedPayload.category;
-        $("pop-qty-input").value = "1";
-        
-        $("dashboard-popup-backdrop").classList.add("open");
-        setTimeout(() => $("pop-qty-input").focus(), 150);
+    /* ============== POPUP CARD ENGINE (MANAGE CLOSE STATES) ============== */
+    function closeDashboardPopupCard(actionType) {
+      if (actionType === 'cancel') {
+        $("dashboard-popup-backdrop").classList.remove("open");
+        return;
       }
-    }
 
-    function closeDashboardPopupCard(shouldSaveEntry) {
+      var userTypedQty = parseFloat($("pop-qty-input").value);
+      if (isNaN(userTypedQty) || userTypedQty <= 0) {
+        alert("Please enter a valid quantity amount!");
+        return;
+      }
+
+      // COMMIT BALANCES TO SCREEN
+      commitPayloadEntryToStaging(userTypedQty);
       $("dashboard-popup-backdrop").classList.remove("open");
-      
-      if (shouldSaveEntry) {
-        var userTypedQty = parseFloat($("pop-qty-input").value);
-        if (!isNaN(userTypedQty) && userTypedQty > 0) {
-          commitPayloadEntryToStaging(userTypedQty);
-          // ➕ ADD & NEXT SCAN FLOW TRIPPED: IMMEDIATE SCANNER RE-OPEN AT HIGH VELOCITY
-          setTimeout(function() { triggerLiveScanner(); }, 250);
-        } else {
-          setLogStatus("Error: Discarded due to missing quantity records values.", "error");
-        }
+
+      // CONDITIONAL DIRECTION ARCHITECTURE
+      if (actionType === 'add_next') {
+        // RE-LAUNCH SCANNER LOOP IMMEDIATELY AT HIGH VELOCITY
+        setTimeout(function() { triggerLiveScanner(); }, 200);
+      } else if (actionType === 'done') {
+        // STOP & REMAIN ON HISTORY LOG SCREEN WITHOUT OPENING SCANNER
+        setLogStatus("Item added. Batch staging screen active.", "success");
       }
     }
 
