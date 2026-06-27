@@ -88,6 +88,40 @@
     .panel.inward .save-btn{ background:var(--green); }
     .panel.outward .save-btn{ background:var(--terracotta); }
 
+    /* Action Container Row balancing Confirm alongside Delete layouts */
+    .action-row-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .action-row-container .action-submit-btn {
+      flex: 2;
+      background-color: #2b2118 !important;
+      color: #fff;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      min-height: 46px;
+    }
+    .action-row-container .action-delete-btn {
+      flex: 1;
+      background-color: #c1572d !important;
+      color: #fff;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      min-height: 46px;
+    }
+    .action-row-container button:active { opacity: 0.9; }
+
     .status{ min-height:16px; font-size:12.5px; margin-top: 2px; font-weight: 500; }
     .status.success{ color:var(--green); }
     .status.error{ color:var(--terracotta); }
@@ -231,7 +265,11 @@
           <div id="in-batch-preview" class="batch-preview-box">No scanned items staged yet.</div>
         </div>
 
-        <button class="save-btn" style="background-color: #2b2118 !important;" type="button" onclick="submitEntireBatch('in')">Confirm & Submit Batch</button>
+        <div class="action-row-container">
+          <button class="action-submit-btn" type="button" onclick="submitEntireBatch('in')">Confirm & Submit Batch</button>
+          <button class="action-delete-btn" type="button" onclick="deleteEntireBatchQueue('in')">Delete</button>
+        </div>
+        
         <div id="in-status" class="status"></div>
       </div>
     </div>
@@ -281,7 +319,11 @@
           <div id="out-batch-preview" class="batch-preview-box">No scanned items staged yet.</div>
         </div>
 
-        <button class="save-btn" style="background-color: #2b2118 !important;" type="button" onclick="submitEntireBatch('out')">Confirm & Submit Batch</button>
+        <div class="action-row-container">
+          <button class="action-submit-btn" type="button" onclick="submitEntireBatch('out')">Confirm & Submit Batch</button>
+          <button class="action-delete-btn" type="button" onclick="deleteEntireBatchQueue('out')">Delete</button>
+        </div>
+
         <div id="out-status" class="status"></div>
       </div>
     </div>
@@ -375,6 +417,21 @@
         dispatchBatchQueue = [];
       }
       updateBatchPreviewDisplay(side);
+    }
+
+    // Direct deletion trigger clearing out current staged workspace elements completely
+    function deleteEntireBatchQueue(side) {
+      var targetQueue = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
+      if (targetQueue.length === 0) {
+        setStatus(side, "Queue is already empty.", "error");
+        return;
+      }
+      var confirmation = confirm("Clear all " + targetQueue.length + " items from current batch queue?");
+      if (confirmation) {
+        clearBatchQueue(side);
+        resetFormFields(side);
+        setStatus(side, "Batch queue workspace has been successfully reset.", "success");
+      }
     }
 
     /* ============== LIVE BARCODE SCANNER ============== */
@@ -506,11 +563,11 @@
       var finalBarcode = code;
       var extractedWeight = 0;
 
-      // Alphanumeric Logic: If input is like R20400540 (Length > 4)
+      // Alphanumeric Logic: e.g., R20400540 (Length > 4)
       if (code.length > 4) {
-        finalBarcode = code.substring(0, 4); // Parsed product identification code -> R204
-        var weightPart = code.substring(4); // Dynamic string sequence component -> 00540
-        extractedWeight = parseFloat(weightPart) || 0; // Parsed direct payload float -> 540
+        finalBarcode = code.substring(0, 4); 
+        var weightPart = code.substring(4); 
+        extractedWeight = parseFloat(weightPart) || 0; 
       }
 
       $(side + "-barcode").value = finalBarcode;
@@ -640,7 +697,6 @@
 
     function handlePostScanWorkflow(side, isWeightPreParsed) {
       if (!isWeightPreParsed) {
-        // Standard code layout prompt loop execution
         var userQty = prompt("Enter Quantity for " + $(side + "-product").value + ":", "1");
         if (userQty !== null) {
           var cleanQty = parseFloat(userQty);
@@ -653,7 +709,6 @@
           }
         }
       } else {
-        // Auto-extract weight scenario matched (e.g. 540 gm pulled directly). Automatically added to batch queue.
         stageScannedItem(side);
         setTimeout(function() { startScanner(side); }, 400);
       }
