@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>Raghuvir Sweets and Bakers — Inventory</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght=500;600&family=Inter:wght=400;500;600&family=JetBrains+Mono:wght=500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght=500;600&family=Inter:wght=400;500;600;700&family=JetBrains+Mono:wght=500&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg:#FBF5EC;
@@ -71,7 +71,6 @@
     .panel.inward .scan-trigger-box { color: var(--green); border-color: var(--green); background: var(--green-soft); }
     .panel.outward .scan-trigger-box { color: var(--terracotta); border-color: var(--terracotta); background: var(--terracotta-soft); }
     .scan-trigger-box:active { transform: scale(0.98); opacity: 0.9; }
-    .scan-trigger-box span { font-size: 11px; font-weight: 500; opacity: 0.8; }
 
     .fallback-link{
       text-align:center; font-size:12px; font-weight:600; color:var(--text-soft);
@@ -88,117 +87,89 @@
     .panel.inward .save-btn{ background:var(--green); }
     .panel.outward .save-btn{ background:var(--terracotta); }
 
-    /* Action Container Row balancing Confirm alongside Delete layouts */
-    .action-row-container {
-      display: flex;
-      gap: 10px;
-      margin-top: 4px;
-    }
+    .action-row-container { display: flex; gap: 10px; margin-top: 4px; }
     .action-row-container .action-submit-btn {
-      flex: 2;
-      background-color: #2b2118 !important;
-      color: #fff;
-      padding: 13px;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      min-height: 46px;
+      flex: 2; background-color: #2b2118 !important; color: #fff;
+      padding: 13px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; min-height: 46px;
     }
     .action-row-container .action-delete-btn {
-      flex: 1;
-      background-color: #c1572d !important;
-      color: #fff;
-      padding: 13px;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      min-height: 46px;
+      flex: 1; background-color: #c1572d !important; color: #fff;
+      padding: 13px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; min-height: 46px;
     }
     .action-row-container button:active { opacity: 0.9; }
 
     .status{ min-height:16px; font-size:12.5px; margin-top: 2px; font-weight: 500; }
     .status.success{ color:var(--green); }
     .status.error{ color:var(--terracotta); }
-    footer{ text-align:center; margin-top:26px; font-size:11.5px; color:var(--text-soft); }
 
-    /* ===== LIVE SCANNER OVERLAY ===== */
-    #scanner-modal{
-      position:fixed; inset:0; background:#0B0C0A; z-index:9999;
-      display:none;
-    }
-    #scanner-modal.active{ display:block; }
-
-    #scanner-viewport{ position:absolute; inset:0; overflow:hidden; }
-    #scanner-viewport video,
-    #scanner-viewport canvas{
-      position:absolute; inset:0;
-      width:100% !important; height:100% !important;
-      object-fit:cover;
-    }
-
-    .scanner-topbar{
-      position:absolute; top:0; left:0; right:0; z-index:3;
-      display:flex; align-items:center; justify-content:space-between;
-      padding:16px 16px calc(16px + env(safe-area-inset-top, 0px));
-      background:linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
-    }
-    .scanner-topbar .scanner-title{
-      color:#fff; font-family:'Fraunces',serif; font-size:16px; font-weight:600;
-    }
-    .scanner-cancel{
-      background:rgba(255,255,255,0.16); color:#fff; border:none; border-radius:8px;
-      padding:9px 14px; font-weight:600; font-size:13px; font-family:inherit; cursor:pointer;
-    }
-    .scanner-cancel:active{ opacity:0.85; }
-
-    .scanner-guide{
-      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-      width:82%; max-width:380px; height:110px;
-      border:3px solid var(--green); border-radius:12px;
-      box-shadow:0 0 0 2000px rgba(0,0,0,0.5);
-      z-index:2; pointer-events:none; overflow:hidden;
-    }
-    .scanner-guide::after{
-      content:""; position:absolute; left:6%; right:6%; height:2px;
-      background:var(--green); box-shadow:0 0 10px var(--green);
-      top:6%; animation:scanline 1.7s ease-in-out infinite;
-    }
-    @keyframes scanline{
-      0%{ top:6%; } 50%{ top:88%; } 100%{ top:6%; }
-    }
-
-    .scanner-status{
-      position:absolute; bottom:0; left:0; right:0; z-index:3;
-      text-align:center; color:#fff; font-size:13px; font-weight:500;
-      padding:0 24px calc(28px + env(safe-area-inset-bottom, 0px));
-      background:linear-gradient(to top, rgba(0,0,0,0.55), transparent);
-      padding-top:40px;
-    }
-
-    /* ===== BATCH PREVIEW CONTAINER ===== */
+    /* ===== BATCH PREVIEW CONTAINER WITH INDIVIDUAL DELETIONS ===== */
     .batch-preview-box {
-      margin-top: 12px;
-      padding: 10px;
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      background: #fafafa;
-      max-height: 150px;
-      overflow-y: auto;
+      margin-top: 12px; padding: 10px; border: 1px dashed var(--border);
+      border-radius: 8px; background: #fafafa; max-height: 180px; overflow-y: auto;
     }
     .batch-item-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      padding: 4px 0;
-      border-bottom: 1px solid #eee;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 13px; padding: 6px 0; border-bottom: 1px solid #eee;
     }
     .batch-item-row:last-child { border-bottom: none; }
+    .batch-item-left { display: flex; flex-direction: column; gap: 2px; }
+    .batch-item-right { display: flex; align-items: center; gap: 10px; }
+    .single-delete-icon-btn {
+      background: none; border: none; color: var(--terracotta); font-size: 14px;
+      font-weight: bold; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: background 0.2s;
+    }
+    .single-delete-icon-btn:hover { background: var(--terracotta-soft); }
+
+    /* ===== FAST SCANNER LIVE OVERLAY ===== */
+    #scanner-modal{ position:fixed; inset:0; background:#0B0C0A; z-index:9999; display:none; }
+    #scanner-modal.active{ display:block; }
+    #scanner-viewport{ position:absolute; inset:0; overflow:hidden; }
+    #scanner-viewport video, #scanner-viewport canvas{
+      position:absolute; inset:0; width:100% !important; height:100% !important; object-fit:cover;
+    }
+    .scanner-topbar{
+      position:absolute; top:0; left:0; right:0; z-index:3; display:flex; align-items:center; justify-content:space-between;
+      padding:16px 16px calc(16px + env(safe-area-inset-top, 0px)); background:linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
+    }
+    .scanner-topbar .scanner-title{ color:#fff; font-family:'Fraunces',serif; font-size:16px; font-weight:600; }
+    .scanner-cancel{
+      background:rgba(255,255,255,0.16); color:#fff; border:none; border-radius:8px; padding:9px 14px; font-weight:600; font-size:13px; cursor:pointer;
+    }
+    .scanner-guide{
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:84%; max-width:380px; height:120px;
+      border:3px solid var(--green); border-radius:12px; box-shadow:0 0 0 2000px rgba(0,0,0,0.5); z-index:2; pointer-events:none; overflow:hidden;
+    }
+    .scanner-guide::after{
+      content:""; position:absolute; left:4%; right:4%; height:2.5px; background:var(--green); box-shadow:0 0 12px var(--green);
+      top:6%; animation:scanline 1.4s ease-in-out infinite;
+    }
+    @keyframes scanline{ 0%{ top:6%; } 50%{ top:90%; } 100%{ top:6%; } }
+    .scanner-status{
+      position:absolute; bottom:0; left:0; right:0; z-index:3; text-align:center; color:#fff; font-size:13px; font-weight:500;
+      padding:0 24px calc(28px + env(safe-area-inset-bottom, 0px)); background:linear-gradient(to top, rgba(0,0,0,0.55), transparent); padding-top:40px;
+    }
+
+    /* ===== BEAUTIFUL MODERN POPUP WINDOW DIALOGS ===== */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(43, 33, 24, 0.45); backdrop-filter: blur(4px);
+      z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: auto; }
+    .modal-window {
+      background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 360px;
+      border-radius: var(--radius); padding: 22px; box-shadow: 0 12px 30px rgba(43, 33, 24, 0.15);
+      transform: scale(0.92); transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-backdrop.open .modal-window { transform: scale(1); }
+    .modal-title { font-family: 'Fraunces', serif; font-size: 19px; font-weight: 600; color: var(--text); margin: 0 0 10px 0; }
+    .modal-message { font-size: 14px; color: var(--text-soft); line-height: 1.4; margin: 0 0 18px 0; }
+    .modal-input-field { width: 100%; padding: 11px; font-size: 16px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 18px; text-align: center; font-weight: 600; }
+    .modal-buttons-group { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-btn { padding: 10px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .modal-btn-cancel { background: var(--bg); color: var(--text-soft); }
+    .modal-btn-confirm { background: var(--text); color: #fff; }
+    .modal-btn-danger { background: var(--terracotta); color: #fff; }
   </style>
 </head>
 <body>
@@ -206,7 +177,7 @@
     <header>
       <div>
         <h1>Raghuvir Sweets and Bakers</h1>
-        <p>Inventory Desk — Live Scan Build</p>
+        <p>Inventory Desk — High-Speed Scan Build</p>
       </div>
     </header>
     <div class="divider"></div>
@@ -226,12 +197,11 @@
         <span>Production Unit</span>
       </div>
       <div class="panel-body">
-
         <div class="scan-trigger-box" onclick="startScanner('in')">
           <strong>⚡ TAP TO START SCANNING</strong>
-          <span>(Camera will open — point it at the barcode, it scans automatically)</span>
+          <span>(Point camera at barcode for high-speed tracking)</span>
         </div>
-        <button class="fallback-link" type="button" onclick="triggerHardwareLens('in')">Camera not opening? Tap to take a photo instead</button>
+        <button class="fallback-link" type="button" onclick="triggerHardwareLens('in')">Camera not opening? Take a photo</button>
         <input type="file" id="in-lens" class="hidden-hardware-input" accept="image/*" capture="environment" onchange="processLensFrame(this, 'in')">
 
         <div class="field">
@@ -267,9 +237,8 @@
 
         <div class="action-row-container">
           <button class="action-submit-btn" type="button" onclick="submitEntireBatch('in')">Confirm & Submit Batch</button>
-          <button class="action-delete-btn" type="button" onclick="deleteEntireBatchQueue('in')">Delete</button>
+          <button class="action-delete-btn" type="button" onclick="deleteEntireBatchQueue('in')">Delete All</button>
         </div>
-        
         <div id="in-status" class="status"></div>
       </div>
     </div>
@@ -280,12 +249,11 @@
         <span>Dispatch Unit</span>
       </div>
       <div class="panel-body">
-
         <div class="scan-trigger-box" onclick="startScanner('out')">
           <strong>⚡ TAP TO START SCANNING</strong>
-          <span>(Camera will open — point it at the barcode, it scans automatically)</span>
+          <span>(Point camera at barcode for high-speed tracking)</span>
         </div>
-        <button class="fallback-link" type="button" onclick="triggerHardwareLens('out')">Camera not opening? Tap to take a photo instead</button>
+        <button class="fallback-link" type="button" onclick="triggerHardwareLens('out')">Camera not opening? Take a photo</button>
         <input type="file" id="out-lens" class="hidden-hardware-input" accept="image/*" capture="environment" onchange="processLensFrame(this, 'out')">
 
         <div class="field">
@@ -321,9 +289,8 @@
 
         <div class="action-row-container">
           <button class="action-submit-btn" type="button" onclick="submitEntireBatch('out')">Confirm & Submit Batch</button>
-          <button class="action-delete-btn" type="button" onclick="deleteEntireBatchQueue('out')">Delete</button>
+          <button class="action-delete-btn" type="button" onclick="deleteEntireBatchQueue('out')">Delete All</button>
         </div>
-
         <div id="out-status" class="status"></div>
       </div>
     </div>
@@ -332,11 +299,21 @@
   <div id="scanner-modal">
     <div id="scanner-viewport"></div>
     <div class="scanner-topbar">
-      <span class="scanner-title">Scanning…</span>
+      <span class="scanner-title">High-Speed Scanning…</span>
       <button class="scanner-cancel" type="button" onclick="stopScanner()">✕ Cancel</button>
     </div>
     <div class="scanner-guide"></div>
-    <div class="scanner-status" id="scanner-status-text">Point the camera at the barcode and hold steady</div>
+    <div class="scanner-status" id="scanner-status-text">Align barcode in frame box</div>
+  </div>
+
+  <div id="custom-modal-backdrop" class="modal-backdrop" onclick="closeModalOnOutsideClick(event)">
+    <div class="modal-window">
+      <h3 id="custom-modal-title" class="modal-title">Dialog</h3>
+      <p id="custom-modal-msg" class="modal-message">Message text content.</p>
+      <input id="custom-modal-input" class="modal-input-field" type="number" step="any" hidden>
+      <div id="custom-modal-actions" class="modal-buttons-group">
+        </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
@@ -347,8 +324,65 @@
 
     var productionBatchQueue = [];
     var dispatchBatchQueue = [];
+    var activeModalResolve = null;
 
-    /* ============== JSONP helper ============== */
+    /* ============== BEAUTIFUL POPUP WINDOW ENGINE ============== */
+    function showCustomAlert(title, message) {
+      return new Promise(function(resolve) {
+        $("custom-modal-title").innerText = title;
+        $("custom-modal-msg").innerText = message;
+        $("custom-modal-input").hidden = true;
+        $("custom-modal-actions").innerHTML = '<button class="modal-btn modal-btn-confirm" onclick="handleModalResolve(true)">OK</button>';
+        activeModalResolve = resolve;
+        $("custom-modal-backdrop").classList.add("open");
+      });
+    }
+
+    function showCustomConfirm(title, message, isDanger) {
+      return new Promise(function(resolve) {
+        $("custom-modal-title").innerText = title;
+        $("custom-modal-msg").innerText = message;
+        $("custom-modal-input").hidden = true;
+        var confirmClass = isDanger ? "modal-btn-danger" : "modal-btn-confirm";
+        $("custom-modal-actions").innerHTML = `
+          <button class="modal-btn modal-btn-cancel" onclick="handleModalResolve(false)">Cancel</button>
+          <button class="modal-btn ${confirmClass}" onclick="handleModalResolve(true)">Proceed</button>
+        `;
+        activeModalResolve = resolve;
+        $("custom-modal-backdrop").classList.add("open");
+      });
+    }
+
+    function showCustomPrompt(title, message, defaultValue) {
+      return new Promise(function(resolve) {
+        $("custom-modal-title").innerText = title;
+        $("custom-modal-msg").innerText = message;
+        var inputEl = $("custom-modal-input");
+        inputEl.hidden = false;
+        inputEl.value = defaultValue || "";
+        $("custom-modal-actions").innerHTML = `
+          <button class="modal-btn modal-btn-cancel" onclick="handleModalResolve(null)">Cancel</button>
+          <button class="modal-btn modal-btn-confirm" onclick="handleModalResolve($('custom-modal-input').value)">Save</button>
+        `;
+        activeModalResolve = resolve;
+        $("custom-modal-backdrop").classList.add("open");
+        setTimeout(() => inputEl.focus(), 100);
+      });
+    }
+
+    function handleModalResolve(val) {
+      $("custom-modal-backdrop").classList.remove("open");
+      if (activeModalResolve) activeModalResolve(val);
+    }
+
+    function closeModalOnOutsideClick(e) {
+      if (e.target.id === "custom-modal-backdrop") {
+        var isInputVisible = !$("custom-modal-input").hidden;
+        handleModalResolve(isInputVisible ? null : false);
+      }
+    }
+
+    /* ============== JSONP NETWORKING ============== */
     var jsonpCounter = 0;
     function jsonpRequest(params, onSuccess, onError) {
       if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === 0) {
@@ -395,7 +429,7 @@
       if(name === 'in' || name === 'out') {
         resetFormFields(name);
         clearBatchQueue(name);
-        setStatus(name, "System ready. Tap the scanning card above.", "success");
+        setStatus(name, "System ready. Tap scanning card.", "success");
       }
     }
 
@@ -419,22 +453,32 @@
       updateBatchPreviewDisplay(side);
     }
 
-    // Direct deletion trigger clearing out current staged workspace elements completely
-    function deleteEntireBatchQueue(side) {
+    /* ============== ENTRY-WISE DELETION METHOD ============== */
+    function deleteSingleEntryItem(side, index) {
+      if (side === "in") {
+        productionBatchQueue.splice(index, 1);
+      } else {
+        dispatchBatchQueue.splice(index, 1);
+      }
+      updateBatchPreviewDisplay(side);
+      setStatus(side, "Selected entry item removed.", "success");
+    }
+
+    async function deleteEntireBatchQueue(side) {
       var targetQueue = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
       if (targetQueue.length === 0) {
-        setStatus(side, "Queue is already empty.", "error");
+        setStatus(side, "Queue is empty.", "error");
         return;
       }
-      var confirmation = confirm("Clear all " + targetQueue.length + " items from current batch queue?");
-      if (confirmation) {
+      var isConfirmed = await showCustomConfirm("Reset Queue", "Clear all " + targetQueue.length + " items from current batch queue?", true);
+      if (isConfirmed) {
         clearBatchQueue(side);
         resetFormFields(side);
-        setStatus(side, "Batch queue workspace has been successfully reset.", "success");
+        setStatus(side, "Batch queue has been wiped clean.", "success");
       }
     }
 
-    /* ============== LIVE BARCODE SCANNER ============== */
+    /* ============== HIGH-SPEED LIVE BARCODE SCANNER ============== */
     var activeSide = null;
     var scannerRunning = false;
     var detectionBuffer = [];
@@ -442,14 +486,14 @@
     var nativeDetector = null;
     var nativeLoopActive = false;
 
-    var RETAIL_READERS = ["ean_reader", "ean_8_reader", "upc_reader", "code_128_reader", "code_39_reader", "codabar_reader", "code_93_reader"];
+    var RETAIL_READERS = ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "code_39_reader", "codabar_reader"];
 
     function startScanner(side){
       if ($("scanner-modal").classList.contains("active")) return;
 
       activeSide = side;
       detectionBuffer = [];
-      $("scanner-status-text").innerText = "Point the camera at the barcode and hold steady";
+      $("scanner-status-text").innerText = "Align barcode in frame box";
       $("scanner-modal").classList.add("active");
 
       if ("BarcodeDetector" in window) {
@@ -462,17 +506,16 @@
     async function startNativeScanner(side){
       try {
         nativeDetector = new BarcodeDetector({
-          formats: ["code_128", "code_39", "codabar", "code_93", "ean_13", "ean_8", "upc_a", "upc_e", "itf"]
+          formats: ["code_128", "code_39", "ean_13", "ean_8", "upc_a", "codabar"]
         });
-      } catch(e) {
-        nativeDetector = new BarcodeDetector();
-      }
+      } catch(e) { nativeDetector = new BarcodeDetector(); }
 
       try {
-        nativeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        // Requested clean high resolution targets for clearer text definitions
+        nativeStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
+        });
       } catch (err) {
-        console.error(err);
-        $("scanner-status-text").innerText = "Camera error — falling back to secondary engine...";
         startQuaggaScanner(side);
         return;
       }
@@ -485,6 +528,15 @@
       $("scanner-viewport").appendChild(video);
 
       try { await video.play(); } catch(e) {}
+
+      // Fast-focus tracking capabilities integration
+      try {
+        var track = nativeStream.getVideoTracks()[0];
+        var capabilities = track.getCapabilities();
+        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+          await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+        }
+      } catch(e) {}
 
       scannerRunning = true;
       nativeLoopActive = true;
@@ -499,41 +551,30 @@
             acceptScan(barcodes[0].rawValue);
             return;
           }
-        } catch (err) {
-          console.error(err);
-        }
-        await new Promise(function(resolve){ setTimeout(resolve, 150); });
+        } catch (err) {}
+        await new Promise(r => setTimeout(r, 80)); // High cycle frequency rate reduction
       }
     }
 
     function startQuaggaScanner(side){
       Quagga.init({
         inputStream: {
-          name: "Live",
-          type: "LiveStream",
+          name: "Live", type: "LiveStream",
           target: document.querySelector("#scanner-viewport"),
-          constraints: { facingMode: "environment" }
+          constraints: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
         },
-        locator: {
-          patchSize: "medium",
-          halfSample: true,
-          area: { top: "25%", right: "5%", left: "5%", bottom: "25%" }
-        },
-        numOfWorkers: (navigator.hardwareConcurrency ? Math.min(4, navigator.hardwareConcurrency) : 2),
+        locator: { patchSize: "medium", halfSample: false, area: { top: "20%", right: "5%", left: "5%", bottom: "20%" } },
+        numOfWorkers: 4,
         locate: true,
-        decoder: {
-          readers: RETAIL_READERS
-        }
+        decoder: { readers: RETAIL_READERS }
       }, function(err){
         if (err) {
-          console.error(err);
-          $("scanner-status-text").innerText = "Camera error — please allow camera access.";
+          $("scanner-status-text").innerText = "Camera initialisation failed.";
           return;
         }
         Quagga.start();
         scannerRunning = true;
       });
-
       Quagga.onDetected(onBarcodeDetected);
     }
 
@@ -543,13 +584,13 @@
       if (!code || code.length < 4) return;
 
       detectionBuffer.push(code);
-      if (detectionBuffer.length > 3) detectionBuffer.shift();
+      if (detectionBuffer.length > 2) detectionBuffer.shift();
 
-      var lastTwo = detectionBuffer.slice(-2);
-      if (lastTwo.length === 2 && lastTwo[0] === lastTwo[1]) {
+      // Scaled double match lock for ultra fast scanning speeds
+      if (detectionBuffer.length === 2 && detectionBuffer[0] === detectionBuffer[1]) {
         acceptScan(code);
       } else {
-        $("scanner-status-text").innerText = "Reading: " + code + " …";
+        $("scanner-status-text").innerText = "Reading: " + code;
       }
     }
 
@@ -557,13 +598,12 @@
       if (!scannerRunning) return;
       scannerRunning = false;
 
-      if (navigator.vibrate) navigator.vibrate(120);
+      if (navigator.vibrate) navigator.vibrate(80);
 
       var side = activeSide;
       var finalBarcode = code;
       var extractedWeight = 0;
 
-      // Alphanumeric Logic: e.g., R20400540 (Length > 4)
       if (code.length > 4) {
         finalBarcode = code.substring(0, 4); 
         var weightPart = code.substring(4); 
@@ -575,96 +615,69 @@
 
       stopScanner();
       setStatus(side, "Locked Code: " + finalBarcode, "success");
-      
       lookupBarcodeAndProcess(side, extractedWeight > 0);
     }
 
     function stopScanner(){
       scannerRunning = false;
       nativeLoopActive = false;
-
       if (nativeStream) {
-        try { nativeStream.getTracks().forEach(function(t){ t.stop(); }); } catch(e) {}
+        try { nativeStream.getTracks().forEach(t => t.stop()); } catch(e) {}
         nativeStream = null;
       }
-      try { Quagga.offDetected(onBarcodeDetected); } catch(e) {}
-      try { Quagga.stop(); } catch(e) {}
-
+      try { Quagga.offDetected(onBarcodeDetected); Quagga.stop(); } catch(e) {}
       $("scanner-modal").classList.remove("active");
       $("scanner-viewport").innerHTML = "";
       activeSide = null;
     }
 
     /* ============== PHOTO-CAPTURE FALLBACK ============== */
-    function triggerHardwareLens(side) {
-      $(side + "-lens").click();
-    }
-
-    var DECODE_ATTEMPTS = [
-      { inputStream: { size: 1280 }, locator: { patchSize: "medium",  halfSample: true  } },
-      { inputStream: { size: 1600 }, locator: { patchSize: "large",   halfSample: false } },
-      { inputStream: { size: 900  }, locator: { patchSize: "x-large", halfSample: false } }
-    ];
+    function triggerHardwareLens(side) { $(side + "-lens").click(); }
 
     function decodeBarcodeFromImage(src, onDone) {
-      var i = 0;
-      function tryNext() {
-        if (i >= DECODE_ATTEMPTS.length) { onDone(null); return; }
-        var cfg = DECODE_ATTEMPTS[i];
-        i++;
-        Quagga.decodeSingle({
-          src: src,
-          locate: true,
-          inputStream: cfg.inputStream,
-          locator: cfg.locator,
-          decoder: { readers: RETAIL_READERS }
-        }, function(result) {
-          if (result && result.codeResult && result.codeResult.code) {
-            onDone(result.codeResult.code);
-          } else {
-            tryNext();
-          }
-        });
-      }
-      tryNext();
+      Quagga.decodeSingle({
+        src: src, locate: true,
+        inputStream: { size: 1280 },
+        locator: { patchSize: "medium", halfSample: false },
+        decoder: { readers: RETAIL_READERS }
+      }, function(res) {
+        if (res && res.codeResult && res.codeResult.code) {
+          onDone(res.codeResult.code);
+        } else {
+          onDone(null);
+        }
+      });
     }
 
     function processLensFrame(input, side) {
       if (!input.files || input.files.length === 0) return;
-
-      setStatus(side, "Reading barcode from photo...", "");
-      var targetFile = input.files[0];
+      setStatus(side, "Processing file picture source...", "");
       var reader = new FileReader();
-
       reader.onload = function(e) {
         decodeBarcodeFromImage(e.target.result, function(scannedCode) {
           if (scannedCode) {
             var finalBarcode = scannedCode;
             var extractedWeight = 0;
-
             if (scannedCode.length > 4) {
               finalBarcode = scannedCode.substring(0, 4);
               var weightPart = scannedCode.substring(4);
               extractedWeight = parseFloat(weightPart) || 0;
             }
-
             $(side + "-barcode").value = finalBarcode;
             $(side + "-qty").value = extractedWeight;
             setStatus(side, "Locked Code: " + finalBarcode, "success");
             lookupBarcodeAndProcess(side, extractedWeight > 0);
           } else {
-            setStatus(side, "Couldn't read barcode. Try to avoid camera glare.", "error");
+            setStatus(side, "Could not decipher barcode markings from photo source.", "error");
           }
           input.value = "";
         });
       };
-      reader.readAsDataURL(targetFile);
+      reader.readAsDataURL(input.files[0]);
     }
 
-    /* ============== BACKEND CALLS & STAGING OPERATIONS ============== */
-    function lookupBarcode(side) {
-      lookupBarcodeAndProcess(side, false);
-    }
+    /* ============== CORE WORKPLACE CONTROLLERS ============== */
+    function lookupBarcode(side) { lookupBarcodeAndProcess(side, false); }
 
     function lookupBarcodeAndProcess(side, isWeightPreParsed) {
       var barcode = $(side + "-barcode").value.trim();
@@ -678,39 +691,36 @@
         if (res && res.success && res.data) {
           $(side + "-product").value = res.data.name;
           $(side + "-category").value = res.data.category;
-          $(side + "-product").disabled = true; 
           setStatus(side, "Product matched!", "success");
-          
           handlePostScanWorkflow(side, isWeightPreParsed);
         } else {
           $(side + "-product").disabled = false;
           $(side + "-product").value = "";
           $(side + "-product").placeholder = "Enter Product Name manually";
           $(side + "-product").focus();
-          setStatus(side, "New item! Please enter Name and Category manually.", "error");
+          setStatus(side, "New item code! Fill details manually.", "error");
         }
       }, function(err){
-        console.error(err);
-        setStatus(side, "Error connecting to Server. URL might be wrong.", "error");
+        setStatus(side, "Server handshake error.", "error");
       });
     }
 
-    function handlePostScanWorkflow(side, isWeightPreParsed) {
+    async function handlePostScanWorkflow(side, isWeightPreParsed) {
       if (!isWeightPreParsed) {
-        var userQty = prompt("Enter Quantity for " + $(side + "-product").value + ":", "1");
+        var userQty = await showCustomPrompt("Quantity Prompt", "Enter Quantity for " + $(side + "-product").value + ":", "1");
         if (userQty !== null) {
           var cleanQty = parseFloat(userQty);
           if (!isNaN(cleanQty) && cleanQty > 0) {
             $(side + "-qty").value = cleanQty;
             stageScannedItem(side);
-            setTimeout(function() { startScanner(side); }, 400);
+            setTimeout(() => startScanner(side), 300);
           } else {
-            alert("Invalid quantity dropped. Object skipped from batch queue registration.");
+            showCustomAlert("Invalid Input", "Staged object entry skipped due to invalid quantity values.");
           }
         }
       } else {
         stageScannedItem(side);
-        setTimeout(function() { startScanner(side); }, 400);
+        setTimeout(() => startScanner(side), 300);
       }
     }
 
@@ -721,16 +731,13 @@
       var qty = parseFloat($(side + "-qty").value);
 
       if (!barcode || !product || isNaN(qty) || qty <= 0) {
-        setStatus(side, "Error: Staging target items missing validation contexts.", "error");
+        setStatus(side, "Error: Missing item validations.", "error");
         return;
       }
 
       var itemObject = {
         type: (side === "in") ? "PRODUCTION" : "DISPATCH",
-        barcode: barcode,
-        category: category,
-        product: product,
-        qty: qty
+        barcode: barcode, category: category, product: product, qty: qty
       };
 
       if (side === "in") {
@@ -740,7 +747,7 @@
       }
 
       updateBatchPreviewDisplay(side);
-      setStatus(side, "Item successfully added to active batch queue!", "success");
+      setStatus(side, "Added to active batch queue!", "success");
       resetFormFields(side);
     }
 
@@ -756,39 +763,44 @@
       var htmlOutput = "";
       for (var i = 0; i < targetQueue.length; i++) {
         var record = targetQueue[i];
-        htmlOutput += "<div class='batch-item-row'>" +
-                        "<span>" + record.product + " (x" + record.qty + ")</span>" +
-                        "<span style='color: var(--text-soft); font-family: monospace;'>" + record.barcode + "</span>" +
-                      "</div>";
+        htmlOutput += `
+          <div class="batch-item-row">
+            <div class="batch-item-left">
+              <strong style="color: var(--text);">${record.product}</strong>
+              <span style="color: var(--text-soft); font-size: 11px; font-family: monospace;">Code: ${record.barcode} | ${record.category}</span>
+            </div>
+            <div class="batch-item-right">
+              <span style="font-weight: 700; color: var(--text); font-size: 14px;">x${record.qty}</span>
+              <button class="single-delete-icon-btn" type="button" onclick="deleteSingleEntryItem('${side}', ${i})" title="Delete entry item">✕</button>
+            </div>
+          </div>`;
       }
       targetDiv.innerHTML = htmlOutput;
     }
 
-    function submitEntireBatch(side) {
+    async function submitEntireBatch(side) {
       var targetQueue = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
 
       if (targetQueue.length === 0) {
-        return setStatus(side, "Error: Transaction workspace is empty. Scan items first.", "error");
+        return setStatus(side, "Error: Queue is completely empty.", "error");
       }
 
-      var verification = confirm("Are you sure you want to finalize and submit this batch of " + targetQueue.length + " item(s)?");
+      var verification = await showCustomConfirm("Submit Logs", "Finalise and push this batch of " + targetQueue.length + " item(s) to records?", false);
       if (!verification) return;
 
-      setStatus(side, "Uploading entire batch data logs to sheets...", "");
-
+      setStatus(side, "Uploading dataset batch records to server...", "");
       var payloadString = JSON.stringify(targetQueue);
 
       jsonpRequest({ action: "saveBatch", batch: payloadString }, function(res){
         if (res && res.success) {
-          setStatus(side, "Batch logged successfully inside datasheet ledger!", "success");
+          setStatus(side, "Batch logged successfully into ledger!", "success");
           clearBatchQueue(side);
-          setTimeout(() => showScreen('menu'), 1500);
+          setTimeout(() => showScreen('menu'), 1200);
         } else {
-          setStatus(side, "Batch push failure: " + (res && res.error ? res.error : "Unknown context error"), "error");
+          setStatus(side, "Push failure encountered.", "error");
         }
       }, function(err){
-        console.error(err);
-        setStatus(side, "Server timeout error encountered during pipeline data delivery.", "error");
+        setStatus(side, "Network pipeline delivery timeout error.", "error");
       });
     }
 
@@ -799,9 +811,7 @@
     }
 
     function setStatus(side, msg, type) { 
-      var el = $(side + "-status"); 
-      el.innerText = msg; 
-      el.className = "status " + type; 
+      var el = $(side + "-status"); el.innerText = msg; el.className = "status " + type; 
     }
   </script>
 </body>
