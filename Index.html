@@ -8,16 +8,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght=500;600&family=Inter:wght=400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#FBF5EC;
+      --bg:#F4EFE6;
       --surface:#FFFFFF;
       --text:#2B2118;
-      --text-soft:#8A7860;
-      --border:#E8DCC8;
-      --green:#5B7B45;
-      --green-soft:#EAF0E2;
-      --terracotta:#C1572D;
-      --terracotta-soft:#FBEAE1;
-      --radius:14px;
+      --text-soft:#7D6E5D;
+      --border:#E3D5C1;
+      --green:#4A6B32;
+      --green-soft:#E2EBD5;
+      --terracotta:#B84A26;
+      --terracotta-soft:#F5E3DC;
+      --radius:16px;
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     html,body{
@@ -26,106 +26,103 @@
     }
     .wrap{ max-width:480px; margin:0 auto; padding:20px 16px 48px; }
 
-    header{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-    header h1{ font-family:'Fraunces',serif; font-size:21px; font-weight:600; margin:0; line-height:1.25; }
-    header p{ margin:2px 0 0; font-size:12.5px; color:var(--text-soft); }
+    header{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; text-align:center; justify-content:center; }
+    header h1{ font-family:'Fraunces',serif; font-size:22px; font-weight:600; margin:0; color:var(--text); }
+    header p{ margin:4px 0 0; font-size:13px; color:var(--text-soft); }
 
     .divider{
-      height:16px; margin:18px 0 22px; border-radius:2px; opacity:0.16;
-      background:repeating-linear-gradient(90deg,
-        var(--text) 0 2px, transparent 2px 5px,
-        var(--text) 5px 6px, transparent 6px 12px,
-        var(--text) 12px 15px, transparent 15px 22px,
-        var(--text) 22px 23px, transparent 23px 30px);
+      height:12px; margin:18px 0 22px; border-radius:2px; opacity:0.15;
+      background:repeating-linear-gradient(90deg, var(--text) 0 2px, transparent 2px 6px);
     }
 
     #menu-screen{ display:flex; flex-direction:row; gap:12px; }
     .menu-btn{
-      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
-      padding:24px 12px; border:none; border-radius:var(--radius); cursor:pointer;
-      color:#fff; text-align:center; font-family:inherit; flex:1; min-width:0;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:28px 12px; border:none; border-radius:var(--radius); cursor:pointer;
+      color:#fff; text-align:center; font-family:inherit; flex:1; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     .menu-btn.inward{ background:var(--green); }
     .menu-btn.outward{ background:var(--terracotta); }
-    .menu-btn:active{ opacity:0.9; }
+    .menu-btn:active{ opacity:0.9; transform: scale(0.98); }
     .menu-btn-title{ font-family:'Fraunces',serif; font-size:18px; font-weight:600; }
 
-    .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
-    .panel-head{ display:flex; align-items:center; gap:10px; padding:13px 18px; font-family:'Fraunces',serif; font-size:16px; font-weight:600; border-bottom:1px solid var(--border); }
+    .panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:0 8px 24px rgba(43,21,24,0.04); }
+    .panel-head{ display:flex; align-items:center; gap:10px; padding:15px 18px; font-family:'Fraunces',serif; font-size:17px; font-weight:600; border-bottom:1px solid var(--border); }
     .panel.inward .panel-head{ background:var(--green-soft); color:var(--green); }
     .panel.outward .panel-head{ background:var(--terracotta-soft); color:var(--terracotta); }
-    .back-btn{ border:none; background:none; font-size:19px; line-height:1; cursor:pointer; color:inherit; padding:2px 4px 2px 0; }
-    .panel-body{ padding:16px 18px 18px; display:flex; flex-direction:column; gap:12px; }
+    .back-btn{ border:none; background:none; font-size:20px; line-height:1; cursor:pointer; color:inherit; padding:2px 8px; }
+    .panel-body{ padding:18px; display:flex; flex-direction:column; gap:14px; }
 
-    /* Helper styles for automatic dynamic fields showing/hiding rules */
-    .dynamic-field-group { display: flex; flex-direction: column; gap: 12px; }
-    .dynamic-field-group.hidden { display: none !important; }
+    /* RULES FOR HIDDEN FIELDS BY DEFAULT */
+    .weight-only-fields { display: none; flex-direction: column; gap: 12px; animation: fadeIn 0.3s ease; }
+    .weight-only-fields.visible { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
-    .field label{ display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:600; margin-bottom:5px; }
-    input,select{ width:100%; padding:11px; border:1px solid var(--border); border-radius:8px; font-size:16px; font-family:inherit; background:#fff; color:var(--text); min-height:44px; }
-    input:disabled { background: #f5f5f5; color: #777; cursor: not-allowed; }
+    .field label{ display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-soft); font-weight:700; margin-bottom:5px; }
+    input,select{ width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; font-size:16px; font-family:inherit; background:#fff; color:var(--text); min-height:46px; }
+    input:disabled { background: #f7f5f2; color: #7d6e5d; cursor: not-allowed; border-color: var(--border); }
 
     .scan-trigger-box {
-      width: 100%; padding: 22px; text-align: center;
-      border: 3px dashed var(--border); border-radius: 12px;
-      cursor: pointer; font-weight: 600; font-size: 16px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-      background: #fff; margin-bottom: 4px; transition: all 0.2s;
+      width: 100%; padding: 26px; text-align: center;
+      border: 2px dashed var(--border); border-radius: 12px;
+      cursor: pointer; font-size: 15px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+      background: #fff; margin-bottom: 2px; transition: all 0.2s;
     }
+    .scan-trigger-box strong { font-size: 16px; letter-spacing: 0.02em; }
     .panel.inward .scan-trigger-box { color: var(--green); border-color: var(--green); background: var(--green-soft); }
     .panel.outward .scan-trigger-box { color: var(--terracotta); border-color: var(--terracotta); background: var(--terracotta-soft); }
-    .scan-trigger-box:active { transform: scale(0.98); opacity: 0.9; }
+    .scan-trigger-box:active { transform: scale(0.97); }
 
     .fallback-link{
       text-align:center; font-size:12px; font-weight:600; color:var(--text-soft);
-      text-decoration:underline; cursor:pointer; margin-bottom:8px; background:none; border:none; font-family:inherit;
+      text-decoration:underline; cursor:pointer; background:none; border:none; font-family:inherit; margin-top: -4px;
     }
-
     .hidden-hardware-input { display: none !important; }
 
     .qty-row{ display:flex; gap:8px; }
-    .qty-row input{ text-align:center; font-weight: 700; color: var(--text); background: #fffcf7; border-color: var(--text-soft); }
-    .qty-btn{ width:44px; flex-shrink:0; border:1px solid var(--border); border-radius:8px; background:#fff; font-size:19px; line-height:1; cursor:pointer; min-height:44px; }
+    .qty-row input{ text-align:center; font-weight: 700; color: var(--text); font-size: 18px; }
+    .qty-btn{ width:48px; flex-shrink:0; border:1px solid var(--border); border-radius:10px; background:#fff; font-size:22px; cursor:pointer; min-height:46px; }
 
-    .save-btn{ margin-top:4px; padding:13px; border:none; border-radius:8px; font-size:15px; font-weight:600; font-family:inherit; color:#fff; cursor:pointer; min-height:46px; }
+    .save-btn{ margin-top:4px; padding:14px; border:none; border-radius:10px; font-size:15px; font-weight:600; font-family:inherit; color:#fff; cursor:pointer; }
     .panel.inward .save-btn{ background:var(--green); }
     .panel.outward .save-btn{ background:var(--terracotta); }
 
-    .action-row-container { display: flex; gap: 10px; margin-top: 4px; }
+    .action-row-container { display: flex; gap: 10px; margin-top: 6px; }
     .action-row-container .action-submit-btn {
-      flex: 2; background-color: #2b2118 !important; color: #fff;
-      padding: 13px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; min-height: 46px;
+      flex: 2; background-color: #2B2118 !important; color: #fff;
+      padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; min-height: 48px;
     }
     .action-row-container .action-delete-btn {
-      flex: 1; background-color: #c1572d !important; color: #fff;
-      padding: 13px; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; min-height: 46px;
+      flex: 1; background-color: #A33612 !important; color: #fff;
+      padding: 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; min-height: 48px;
     }
-    .action-row-container button:active { opacity: 0.9; }
 
-    .status{ min-height:16px; font-size:12.5px; margin-top: 2px; font-weight: 500; }
+    .status{ min-height:18px; font-size:13px; font-weight: 600; text-align: center; margin-top: 4px; }
     .status.success{ color:var(--green); }
     .status.error{ color:var(--terracotta); }
 
-    /* ===== BATCH PREVIEW WORKSPACE ===== */
+    /* ===== ENTRY-WISE DELETE LIST DESIGN ===== */
     .batch-preview-box {
-      margin-top: 12px; padding: 10px; border: 1px dashed var(--border);
-      border-radius: 8px; background: #fafafa; max-height: 200px; overflow-y: auto;
+      margin-top: 8px; padding: 4px 12px; border: 1px solid var(--border);
+      border-radius: 10px; background: #FCFAF7; max-height: 220px; overflow-y: auto;
     }
     .batch-item-row {
       display: flex; justify-content: space-between; align-items: center;
-      font-size: 13px; padding: 8px 0; border-bottom: 1px solid #eee;
+      font-size: 13.5px; padding: 10px 0; border-bottom: 1px dashed var(--border);
     }
     .batch-item-row:last-child { border-bottom: none; }
     .batch-item-left { display: flex; flex-direction: column; gap: 2px; }
-    .batch-item-right { display: flex; align-items: center; gap: 12px; }
+    .batch-item-right { display: flex; align-items: center; gap: 14px; }
     .single-delete-icon-btn {
-      background: none; border: none; color: #a13214; font-size: 15px;
-      font-weight: bold; cursor: pointer; padding: 6px 10px; border-radius: 6px; transition: all 0.2s;
+      background: #F5ECE1; border: none; color: #A33612; font-size: 14px;
+      font-weight: 700; cursor: pointer; width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
     }
-    .single-delete-icon-btn:active { background: var(--terracotta-soft); transform: scale(0.9); }
+    .single-delete-icon-btn:active { background: #EADBC8; transform: scale(0.9); }
 
-    /* ===== HIGH-SPEED LIVE OVERLAY ===== */
-    #scanner-modal{ position:fixed; inset:0; background:#0B0C0A; z-index:9999; display:none; }
+    /* ===== QUICK CAMERA OVERLAY ===== */
+    #scanner-modal{ position:fixed; inset:0; background:#000; z-index:9999; display:none; }
     #scanner-modal.active{ display:block; }
     #scanner-viewport{ position:absolute; inset:0; overflow:hidden; }
     #scanner-viewport video, #scanner-viewport canvas{
@@ -133,52 +130,47 @@
     }
     .scanner-topbar{
       position:absolute; top:0; left:0; right:0; z-index:3; display:flex; align-items:center; justify-content:space-between;
-      padding:16px 16px calc(16px + env(safe-area-inset-top, 0px)); background:linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
+      padding:16px; background:linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
     }
-    .scanner-topbar .scanner-title{ color:#fff; font-family:'Fraunces',serif; font-size:16px; font-weight:600; }
     .scanner-cancel{
-      background:rgba(255,255,255,0.16); color:#fff; border:none; border-radius:8px; padding:9px 14px; font-weight:600; font-size:13px; cursor:pointer;
+      background:rgba(255,255,255,0.2); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-weight:600; font-size:13px; cursor:pointer;
     }
     .scanner-guide{
-      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:84%; max-width:380px; height:120px;
-      border:3px solid var(--green); border-radius:12px; box-shadow:0 0 0 2000px rgba(0,0,0,0.5); z-index:2; pointer-events:none; overflow:hidden;
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:80%; max-width:360px; height:130px;
+      border:3px solid #6BA344; border-radius:14px; box-shadow:0 0 0 2000px rgba(0,0,0,0.6); z-index:2; pointer-events:none;
     }
     .scanner-guide::after{
-      content:""; position:absolute; left:4%; right:4%; height:2.5px; background:var(--green); box-shadow:0 0 12px var(--green);
-      top:6%; animation:scanline 1.2s ease-in-out infinite;
+      content:""; position:absolute; left:2%; right:2%; height:3px; background:#6BA344; box-shadow:0 0 10px #6BA344;
+      top:10%; animation:scanline 1.1s ease-in-out infinite;
     }
-    @keyframes scanline{ 0%{ top:6%; } 50%{ top:90%; } 100%{ top:6%; } }
-    .scanner-status{
-      position:absolute; bottom:0; left:0; right:0; z-index:3; text-align:center; color:#fff; font-size:13px; font-weight:500;
-      padding:0 24px calc(28px + env(safe-area-inset-bottom, 0px)); background:linear-gradient(to top, rgba(0,0,0,0.55), transparent); padding-top:40px;
-    }
+    @keyframes scanline{ 0% { top:10%; } 50% { top:90%; } 100% { top:10%; } }
+    .scanner-status{ position:absolute; bottom:30px; left:0; right:0; z-index:3; text-align:center; color:#fff; font-size:14px; font-weight:500; }
 
-    /* ===== ULTRA-PREMIUM MODERN POPUP DIALOG WINDOWS ===== */
+    /* ===== BEAUTIFUL DIALOG WINDOW POPUPS ===== */
     .modal-backdrop {
-      position: fixed; inset: 0; background: rgba(24, 18, 13, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      position: fixed; inset: 0; background: rgba(24, 18, 13, 0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;
-      opacity: 0; pointer-events: none; transition: opacity 0.25s ease-out;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
     }
     .modal-backdrop.open { opacity: 1; pointer-events: auto; }
     .modal-window {
-      background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 350px;
-      border-radius: 16px; padding: 24px; box-shadow: 0 16px 40px rgba(43, 33, 24, 0.2);
-      transform: translateY(15px) scale(0.95); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: #FFFFFF; border: 1px solid var(--border); width: 100%; max-width: 350px;
+      border-radius: 20px; padding: 24px; box-shadow: 0 20px 48px rgba(43, 33, 24, 0.25);
+      transform: scale(0.9); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.15);
     }
-    .modal-backdrop.open .modal-window { transform: translateY(0) scale(1); }
-    .modal-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: var(--text); margin: 0 0 8px 0; text-align: center; }
+    .modal-backdrop.open .modal-window { transform: scale(1); }
+    .modal-title { font-family: 'Fraunces', serif; font-size: 21px; font-weight: 600; color: var(--text); margin: 0 0 8px 0; text-align: center; }
     .modal-message { font-size: 14px; color: var(--text-soft); line-height: 1.4; margin: 0 0 20px 0; text-align: center; }
     
-    .modal-input-wrapper { background: #fdfbf7; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-    .modal-input-wrapper label { display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-soft); margin-bottom: 6px; text-align: center; letter-spacing: 0.04em; }
-    .modal-input-field { width: 100%; padding: 8px; font-size: 22px; font-weight: 700; border: none; background: transparent; text-align: center; color: var(--text); font-family: inherit; outline: none; }
+    .modal-input-wrapper { background: #FDFBF7; border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 20px; }
+    .modal-input-wrapper label { display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-soft); margin-bottom: 4px; text-align: center; }
+    .modal-input-field { width: 100%; padding: 6px; font-size: 24px; font-weight: 700; border: none; background: transparent; text-align: center; color: var(--text); outline: none; }
     
     .modal-buttons-group { display: flex; gap: 10px; }
-    .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; text-align: center; transition: opacity 0.15s; }
-    .modal-btn:active { opacity: 0.85; }
-    .modal-btn-cancel { background: #f0ebd9; color: var(--text); }
-    .modal-btn-confirm { background: #2b2118; color: #fff; }
-    .modal-btn-danger { background: var(--terracotta); color: #fff; }
+    .modal-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: 14.5px; font-weight: 600; cursor: pointer; font-family: inherit; text-align: center; }
+    .modal-btn-cancel { background: #EDE6DA; color: var(--text); }
+    .modal-btn-confirm { background: #2B2118; color: #fff; }
+    .modal-btn-danger { background: #A33612; color: #fff; }
   </style>
 </head>
 <body>
@@ -186,7 +178,7 @@
     <header>
       <div>
         <h1>Raghuvir Sweets and Bakers</h1>
-        <p>Inventory Desk — Auto-Weight High-Speed Scan</p>
+        <p>Smart Inventory — High-Speed Dynamic Form</p>
       </div>
     </header>
     <div class="divider"></div>
@@ -203,20 +195,20 @@
     <div id="in-screen" class="panel inward" hidden>
       <div class="panel-head">
         <button class="back-btn" type="button" onclick="exitScreen('in')">←</button>
-        <span>Production Unit</span>
+        <span>Production Counter</span>
       </div>
       <div class="panel-body">
         <div class="scan-trigger-box" onclick="startScanner('in')">
-          <strong>⚡ TAP TO START SCANNING</strong>
-          <span>(Auto-extracts weight & closes instantly)</span>
+          <strong>⚡ TAP TO SCAN BARCODE</strong>
+          <span>(Weight scales add to batch list instantly)</span>
         </div>
-        <button class="fallback-link" type="button" onclick="triggerHardwareLens('in')">Camera not opening? Take a photo</button>
+        <button class="fallback-link" type="button" onclick="triggerHardwareLens('in')">Upload Image Fallback</button>
         <input type="file" id="in-lens" class="hidden-hardware-input" accept="image/*" capture="environment" onchange="processLensFrame(this, 'in')">
 
-        <div id="in-dynamic-fields" class="dynamic-field-group">
+        <div id="in-fields-area" class="weight-only-fields">
           <div class="field">
             <label>Barcode</label>
-            <input id="in-barcode" type="text" placeholder="Waiting for barcode data..." onchange="lookupBarcode('in')">
+            <input id="in-barcode" type="text" placeholder="Barcode code" onchange="lookupBarcode('in')">
           </div>
           <div class="field">
             <label>Category</label>
@@ -227,21 +219,21 @@
           </div>
           <div class="field">
             <label>Product Name</label>
-            <input id="in-product" type="text" placeholder="Product Name" disabled>
+            <input id="in-product" type="text" placeholder="Product details" disabled>
           </div>
           <div class="field">
-            <label>Quantity / Weight</label>
+            <label>Quantity / Live Weight</label>
             <div class="qty-row">
               <button class="qty-btn" type="button" onclick="adjustQty('in',-1)">−</button>
               <input id="in-qty" type="number" min="0" step="any" value="0">
               <button class="qty-btn" type="button" onclick="adjustQty('in',1)">+</button>
             </div>
           </div>
-          <button class="save-btn" type="button" onclick="stageScannedItem('in')">Add to Batch Queue</button>
+          <button class="save-btn" type="button" onclick="stageScannedItem('in')">Save Dynamic Item</button>
         </div>
         
-        <div class="field" style="margin-top: 8px;">
-          <label>Items in current batch queue</label>
+        <div class="field" style="margin-top: 4px;">
+          <label>Staged Batch Queue List</label>
           <div id="in-batch-preview" class="batch-preview-box">No scanned items staged yet.</div>
         </div>
 
@@ -256,20 +248,20 @@
     <div id="out-screen" class="panel outward" hidden>
       <div class="panel-head">
         <button class="back-btn" type="button" onclick="exitScreen('out')">←</button>
-        <span>Dispatch Unit</span>
+        <span>Dispatch Counter</span>
       </div>
       <div class="panel-body">
         <div class="scan-trigger-box" onclick="startScanner('out')">
-          <strong>⚡ TAP TO START SCANNING</strong>
-          <span>(Auto-extracts weight & closes instantly)</span>
+          <strong>⚡ TAP TO SCAN BARCODE</strong>
+          <span>(Weight scales add to batch list instantly)</span>
         </div>
-        <button class="fallback-link" type="button" onclick="triggerHardwareLens('out')">Camera not opening? Take a photo</button>
+        <button class="fallback-link" type="button" onclick="triggerHardwareLens('out')">Upload Image Fallback</button>
         <input type="file" id="out-lens" class="hidden-hardware-input" accept="image/*" capture="environment" onchange="processLensFrame(this, 'out')">
 
-        <div id="out-dynamic-fields" class="dynamic-field-group">
+        <div id="out-fields-area" class="weight-only-fields">
           <div class="field">
             <label>Barcode</label>
-            <input id="out-barcode" type="text" placeholder="Waiting for barcode data..." onchange="lookupBarcode('out')">
+            <input id="out-barcode" type="text" placeholder="Barcode code" onchange="lookupBarcode('out')">
           </div>
           <div class="field">
             <label>Category</label>
@@ -280,21 +272,21 @@
           </div>
           <div class="field">
             <label>Product Name</label>
-            <input id="out-product" type="text" placeholder="Product Name" disabled>
+            <input id="out-product" type="text" placeholder="Product details" disabled>
           </div>
           <div class="field">
-            <label>Quantity / Weight</label>
+            <label>Quantity / Live Weight</label>
             <div class="qty-row">
               <button class="qty-btn" type="button" onclick="adjustQty('out',-1)">−</button>
               <input id="out-qty" type="number" min="0" step="any" value="0">
               <button class="qty-btn" type="button" onclick="adjustQty('out',1)">+</button>
             </div>
           </div>
-          <button class="save-btn" type="button" onclick="stageScannedItem('out')">Add to Batch Queue</button>
+          <button class="save-btn" type="button" onclick="stageScannedItem('out')">Save Dynamic Item</button>
         </div>
 
-        <div class="field" style="margin-top: 8px;">
-          <label>Items in current batch queue</label>
+        <div class="field" style="margin-top: 4px;">
+          <label>Staged Batch Queue List</label>
           <div id="out-batch-preview" class="batch-preview-box">No scanned items staged yet.</div>
         </div>
 
@@ -310,17 +302,17 @@
   <div id="scanner-modal">
     <div id="scanner-viewport"></div>
     <div class="scanner-topbar">
-      <span class="scanner-title">High-Speed Scanning…</span>
-      <button class="scanner-cancel" type="button" onclick="stopScanner()">✕ Cancel</button>
+      <span style="color:#fff; font-family:'Fraunces',serif; font-size:16px;">Scanning Barcode...</span>
+      <button class="scanner-cancel" type="button" onclick="stopScanner()">✕ Close</button>
     </div>
     <div class="scanner-guide"></div>
-    <div class="scanner-status" id="scanner-status-text">Align barcode in frame box</div>
+    <div class="scanner-status" id="scanner-status-text">Hold code steady inside the frame</div>
   </div>
 
   <div id="custom-modal-backdrop" class="modal-backdrop" onclick="closeModalOnOutsideClick(event)">
     <div class="modal-window">
       <h3 id="custom-modal-title" class="modal-title">Raghuvir Sweets</h3>
-      <p id="custom-modal-msg" class="modal-message">Dialog description info goes here.</p>
+      <p id="custom-modal-msg" class="modal-message">Notification detail alerts context.</p>
       
       <div id="custom-modal-input-box" class="modal-input-wrapper" hidden>
         <label id="custom-modal-input-label">Quantity</label>
@@ -342,7 +334,7 @@
     var dispatchBatchQueue = [];
     var activeModalResolve = null;
 
-    /* ============== PREMIUM CUSTOM MODAL WINDOW ENGINE ============== */
+    /* ============== PREMIUM POP-UP DIALOG CONTROL ENGINE ============== */
     function showCustomAlert(title, message) {
       return new Promise(function(resolve) {
         $("custom-modal-title").innerText = title;
@@ -359,10 +351,10 @@
         $("custom-modal-title").innerText = title;
         $("custom-modal-msg").innerText = message;
         $("custom-modal-input-box").hidden = true;
-        var confirmClass = isDanger ? "modal-btn-danger" : "modal-btn-confirm";
+        var btnClass = isDanger ? "modal-btn-danger" : "modal-btn-confirm";
         $("custom-modal-actions").innerHTML = `
           <button class="modal-btn modal-btn-cancel" onclick="handleModalResolve(false)">Cancel</button>
-          <button class="modal-btn ${confirmClass}" onclick="handleModalResolve(true)">Proceed</button>
+          <button class="modal-btn ${btnClass}" onclick="handleModalResolve(true)">Confirm</button>
         `;
         activeModalResolve = resolve;
         $("custom-modal-backdrop").classList.add("open");
@@ -373,20 +365,20 @@
       return new Promise(function(resolve) {
         $("custom-modal-title").innerText = title;
         $("custom-modal-msg").innerText = message;
-        $("custom-modal-input-label").innerText = labelText || "Quantity";
+        $("custom-modal-input-label").innerText = labelText || "QUANTITY";
         
-        var inputWrapper = $("custom-modal-input-box");
-        var inputEl = $("custom-modal-input");
-        inputWrapper.hidden = false;
-        inputEl.value = defaultValue || "";
+        var box = $("custom-modal-input-box");
+        var input = $("custom-modal-input");
+        box.hidden = false;
+        input.value = defaultValue || "";
         
         $("custom-modal-actions").innerHTML = `
           <button class="modal-btn modal-btn-cancel" onclick="handleModalResolve(null)">Cancel</button>
-          <button class="modal-btn modal-btn-confirm" onclick="handleModalResolve($('custom-modal-input').value)">Add To Queue</button>
+          <button class="modal-btn modal-btn-confirm" onclick="handleModalResolve($('custom-modal-input').value)">Add</button>
         `;
         activeModalResolve = resolve;
         $("custom-modal-backdrop").classList.add("open");
-        setTimeout(() => inputEl.focus(), 150);
+        setTimeout(() => input.focus(), 150);
       });
     }
 
@@ -402,43 +394,23 @@
       }
     }
 
-    /* ============== NETWORKING DEPENDENCY ============== */
+    /* ============== NETWORK HANDLING ============== */
     var jsonpCounter = 0;
     function jsonpRequest(params, onSuccess, onError) {
-      if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.indexOf("PASTE_YOUR") === 0) {
-        onError(new Error("Apps Script URL configuration missing."));
-        return;
-      }
       jsonpCounter++;
       var cbName = "jsonpCb" + jsonpCounter + "_" + Date.now();
       var script = document.createElement("script");
-
-      var timeoutId = setTimeout(function(){
-        cleanup();
-        onError(new Error("Timeout error"));
-      }, 15000);
+      var timeoutId = setTimeout(function(){ cleanup(); onError(new Error("Timeout")); }, 15000);
 
       function cleanup(){
         clearTimeout(timeoutId);
         try { delete window[cbName]; } catch(e) { window[cbName] = undefined; }
         if (script.parentNode) script.parentNode.removeChild(script);
       }
-
-      window[cbName] = function(data){
-        cleanup();
-        onSuccess(data);
-      };
-
-      var qs = Object.keys(params).map(function(k){
-        var v = params[k] === undefined || params[k] === null ? "" : params[k];
-        return encodeURIComponent(k) + "=" + encodeURIComponent(v);
-      }).join("&");
-
+      window[cbName] = function(data){ cleanup(); onSuccess(data); };
+      var qs = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join("&");
       script.src = APPS_SCRIPT_URL + "?" + qs + "&callback=" + cbName;
-      script.onerror = function(){
-        cleanup();
-        onError(new Error("Network connection breakdown"));
-      };
+      script.onerror = function(){ cleanup(); onError(new Error("Network Error")); };
       document.body.appendChild(script);
     }
 
@@ -449,8 +421,8 @@
       if(name === 'in' || name === 'out') {
         resetFormFields(name);
         clearBatchQueue(name);
-        $(name + "-dynamic-fields").classList.remove("hidden"); // Normal state show
-        setStatus(name, "Ready for scan operations.", "success");
+        $(name + "-fields-area").classList.remove("visible"); // Always hide on fresh entries screen
+        setStatus(name, "System Ready.", "success");
       }
     }
 
@@ -466,98 +438,56 @@
     }
 
     function clearBatchQueue(side) {
-      if (side === "in") {
-        productionBatchQueue = [];
-      } else {
-        dispatchBatchQueue = [];
-      }
+      if (side === "in") productionBatchQueue = []; else dispatchBatchQueue = [];
       updateBatchPreviewDisplay(side);
     }
 
-    /* ============== ENTRY-WISE TRACKING REMOVALS ============== */
+    /* ============== SINGLE ROW ENTRY DELETION METHOD ============== */
     function deleteSingleEntryItem(side, index) {
-      if (side === "in") {
-        productionBatchQueue.splice(index, 1);
-      } else {
-        dispatchBatchQueue.splice(index, 1);
-      }
+      if (side === "in") productionBatchQueue.splice(index, 1); else dispatchBatchQueue.splice(index, 1);
       updateBatchPreviewDisplay(side);
-      setStatus(side, "Selected line item deleted successfully.", "success");
+      setStatus(side, "Item successfully removed from batch.", "success");
     }
 
     async function deleteEntireBatchQueue(side) {
-      var targetQueue = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
-      if (targetQueue.length === 0) {
-        setStatus(side, "Queue is empty.", "error");
-        return;
-      }
-      var isConfirmed = await showCustomConfirm("Wipe Workspace Queue", "Delete all " + targetQueue.length + " entries inside current batch queue?", true);
-      if (isConfirmed) {
+      var queue = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
+      if (queue.length === 0) return setStatus(side, "Queue is empty.", "error");
+      
+      var ok = await showCustomConfirm("Reset Queue", "Clear all " + queue.length + " entries?", true);
+      if (ok) {
         clearBatchQueue(side);
         resetFormFields(side);
-        $(side + "-dynamic-fields").classList.remove("hidden");
-        setStatus(side, "Batch logging environment cleared.", "success");
+        $(side + "-fields-area").classList.remove("visible");
+        setStatus(side, "Queue wiped.", "success");
       }
     }
 
-    /* ============== HIGH-SPEED BARCODE SCANNING MATRIX ============== */
-    var activeSide = null;
-    var scannerRunning = false;
-    var detectionBuffer = [];
-    var nativeStream = null;
-    var nativeDetector = null;
-    var nativeLoopActive = false;
-
-    var RETAIL_READERS = ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "code_39_reader"];
+    /* ============== HIGH SPEED ULTRA SCANNERS CONTROL ============== */
+    var activeSide = null, scannerRunning = false, detectionBuffer = [];
+    var nativeStream = null, nativeDetector = null, nativeLoopActive = false;
+    var READERS = ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "code_39_reader"];
 
     function startScanner(side){
       if ($("scanner-modal").classList.contains("active")) return;
-
-      activeSide = side;
-      detectionBuffer = [];
-      $("scanner-status-text").innerText = "Aligning camera lenses grid...";
+      activeSide = side; detectionBuffer = [];
+      $("scanner-status-text").innerText = "Align code inside the scanning frame box";
       $("scanner-modal").classList.add("active");
 
-      if ("BarcodeDetector" in window) {
-        startNativeScanner(side);
-      } else {
-        startQuaggaScanner(side);
-      }
+      if ("BarcodeDetector" in window) startNativeScanner(side); else startQuaggaScanner(side);
     }
 
     async function startNativeScanner(side){
+      try { nativeDetector = new BarcodeDetector({ formats: ["code_128", "code_39", "ean_13", "ean_8", "upc_a"] }); } catch(e){}
       try {
-        nativeDetector = new BarcodeDetector({ formats: ["code_128", "code_39", "ean_13", "ean_8", "upc_a"] });
-      } catch(e) { nativeDetector = new BarcodeDetector(); }
-
-      try {
-        nativeStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } 
-        });
-      } catch (err) {
-        startQuaggaScanner(side);
-        return;
-      }
+        nativeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } });
+      } catch (err) { startQuaggaScanner(side); return; }
 
       var video = document.createElement("video");
-      video.setAttribute("playsinline", "");
-      video.muted = true;
-      video.srcObject = nativeStream;
-      $("scanner-viewport").innerHTML = "";
-      $("scanner-viewport").appendChild(video);
+      video.setAttribute("playsinline", ""); video.muted = true; video.srcObject = nativeStream;
+      $("scanner-viewport").innerHTML = ""; $("scanner-viewport").appendChild(video);
+      try { await video.play(); } catch(e){}
 
-      try { await video.play(); } catch(e) {}
-
-      try {
-        var track = nativeStream.getVideoTracks()[0];
-        var capabilities = track.getCapabilities();
-        if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
-          await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
-        }
-      } catch(e) {}
-
-      scannerRunning = true;
-      nativeLoopActive = true;
+      scannerRunning = true; nativeLoopActive = true;
       nativeDetectLoop(video);
     }
 
@@ -566,136 +496,86 @@
         try {
           var barcodes = await nativeDetector.detect(video);
           if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
-            acceptScan(barcodes[0].rawValue);
-            return;
+            acceptScan(barcodes[0].rawValue); return;
           }
-        } catch (err) {}
-        await new Promise(r => setTimeout(r, 60)); // Maximum frequency rate reduction 
+        } catch (e) {}
+        await new Promise(r => setTimeout(r, 60)); // Fast tracking frame refresh cycles
       }
     }
 
     function startQuaggaScanner(side){
       Quagga.init({
-        inputStream: {
-          name: "Live", type: "LiveStream",
-          target: document.querySelector("#scanner-viewport"),
-          constraints: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
-        },
-        locator: { patchSize: "medium", halfSample: false, area: { top: "20%", right: "5%", left: "5%", bottom: "20%" } },
-        numOfWorkers: 4,
-        locate: true,
-        decoder: { readers: RETAIL_READERS }
-      }, function(err){
-        if (err) { return; }
-        Quagga.start();
-        scannerRunning = true;
-      });
+        inputStream: { name: "Live", type: "LiveStream", target: document.querySelector("#scanner-viewport"), constraints: { facingMode: "environment", width: 1280, height: 720 } },
+        locator: { patchSize: "medium", halfSample: false, area: { top: "15%", right: "5%", left: "5%", bottom: "15%" } },
+        decoder: { readers: READERS }
+      }, function(err){ if(!err) { Quagga.start(); scannerRunning = true; } });
       Quagga.onDetected(onBarcodeDetected);
     }
 
-    function onBarcodeDetected(result){
+    function onBarcodeDetected(res){
       if (!scannerRunning) return;
-      var code = result.codeResult.code;
+      var code = res.codeResult.code;
       if (!code || code.length < 4) return;
-
       detectionBuffer.push(code);
       if (detectionBuffer.length > 2) detectionBuffer.shift();
-
-      if (detectionBuffer.length === 2 && detectionBuffer[0] === detectionBuffer[1]) {
-        acceptScan(code);
-      }
+      if (detectionBuffer.length === 2 && detectionBuffer[0] === detectionBuffer[1]) acceptScan(code);
     }
 
     function acceptScan(code){
       if (!scannerRunning) return;
       scannerRunning = false;
-
       if (navigator.vibrate) navigator.vibrate(60);
 
-      var side = activeSide;
-      var finalBarcode = code;
-      var extractedWeight = 0;
-      var hasWeight = false;
+      var side = activeSide, finalBarcode = code, extractedWeight = 0, isWeightBarcode = false;
 
-      // WEIGHT EMBEDDED CONTEXT PATTERNS DETECTION
+      // DETECT WEIGHT SYNDICATION
       if (code.length > 4) {
-        finalBarcode = code.substring(0, 4); 
-        var weightPart = code.substring(4); 
-        extractedWeight = parseFloat(weightPart) || 0; 
-        if (extractedWeight > 0) {
-          hasWeight = true;
-        }
+        finalBarcode = code.substring(0, 4);
+        var weightPart = code.substring(4);
+        extractedWeight = parseFloat(weightPart) || 0;
+        if (extractedWeight > 0) isWeightBarcode = true;
       }
 
       $(side + "-barcode").value = finalBarcode;
       $(side + "-qty").value = extractedWeight;
 
       stopScanner();
-      
-      // HIDE OR SHOW FLUID CONTROLLERS ACCORDINGLY
-      if (hasWeight) {
-        $(side + "-dynamic-fields").classList.remove("hidden"); // Show form if weight needs tracking display
+
+      // **CRITICAL HIDE/SHOW LOGIC FOR WEIGHT CONTEXT**
+      if (isWeightBarcode) {
+        $(side + "-fields-area").classList.add("visible"); // Automatically reveal fields if weight detected
       } else {
-        $(side + "-dynamic-fields").classList.add("hidden");    // Hide behind beautiful popup flows
+        $(side + "-fields-area").classList.remove("visible"); // Keep fields completely invisible for standard items
       }
 
-      setStatus(side, "Scanned: " + finalBarcode, "success");
-      lookupBarcodeAndProcess(side, hasWeight);
+      setStatus(side, "Code Detected: " + finalBarcode, "success");
+      lookupBarcodeAndProcess(side, isWeightBarcode);
     }
 
     function stopScanner(){
-      scannerRunning = false;
-      nativeLoopActive = false;
-      if (nativeStream) {
-        try { nativeStream.getTracks().forEach(t => t.stop()); } catch(e) {}
-        nativeStream = null;
-      }
-      try { Quagga.offDetected(onBarcodeDetected); Quagga.stop(); } catch(e) {}
-      $("scanner-modal").classList.remove("remove");
+      scannerRunning = false; nativeLoopActive = false;
+      if (nativeStream) { try { nativeStream.getTracks().forEach(t => t.stop()); } catch(e){} nativeStream = null; }
+      try { Quagga.offDetected(onBarcodeDetected); Quagga.stop(); } catch(e){}
       $("scanner-modal").classList.remove("active");
-      activeSide = null;
     }
 
-    /* ============== IMAGE CAPTURE INTERPRETATION FALLBACK ============== */
+    /* ============== PHOTO LINK RETRIEVAL FALLBACK ============== */
     function triggerHardwareLens(side) { $(side + "-lens").click(); }
-
     function processLensFrame(input, side) {
       if (!input.files || input.files.length === 0) return;
-      setStatus(side, "Analyzing photography assets...", "");
+      setStatus(side, "Reading uploaded file...", "");
       var reader = new FileReader();
       reader.onload = function(e) {
-        Quagga.decodeSingle({
-          src: e.target.result, locate: true,
-          inputStream: { size: 1280 },
-          locator: { patchSize: "medium", halfSample: false },
-          decoder: { readers: RETAIL_READERS }
-        }, function(res) {
+        Quagga.decodeSingle({ src: e.target.result, locator: { patchSize: "medium", halfSample: false }, decoder: { readers: READERS } }, function(res) {
           if (res && res.codeResult && res.codeResult.code) {
-            var scannedCode = res.codeResult.code;
-            var finalBarcode = scannedCode;
-            var extractedWeight = 0;
-            var hasWeight = false;
-
-            if (scannedCode.length > 4) {
-              finalBarcode = scannedCode.substring(0, 4);
-              var weightPart = scannedCode.substring(4);
-              extractedWeight = parseFloat(weightPart) || 0;
-              if (extractedWeight > 0) hasWeight = true;
-            }
-
-            $(side + "-barcode").value = finalBarcode;
-            $(side + "-qty").value = extractedWeight;
-
-            if (hasWeight) {
-              $(side + "-dynamic-fields").classList.remove("hidden");
-            } else {
-              $(side + "-dynamic-fields").classList.add("hidden");
-            }
-
-            lookupBarcodeAndProcess(side, hasWeight);
+            var c = res.codeResult.code, fb = c, w = 0, iw = false;
+            if (c.length > 4) { fb = c.substring(0, 4); w = parseFloat(c.substring(4)) || 0; if (w > 0) iw = true; }
+            $(side + "-barcode").value = fb; $(side + "-qty").value = w;
+            if (iw) $(side + "-fields-area").classList.add("visible"); else $(side + "-fields-area").classList.remove("visible");
+            lookupBarcodeAndProcess(side, iw);
           } else {
-            $(side + "-dynamic-fields").classList.remove("hidden");
-            setStatus(side, "Decipher failure. Form fields expanded.", "error");
+            $(side + "-fields-area").classList.add("visible");
+            setStatus(side, "Decipher failed. Form unhidden.", "error");
           }
           input.value = "";
         });
@@ -703,70 +583,54 @@
       reader.readAsDataURL(input.files[0]);
     }
 
-    /* ============== ENGINE MANAGEMENT SYSTEMS ============== */
-    function lookupBarcode(side) { 
-      $(side + "-dynamic-fields").classList.remove("hidden"); // Manual modifications expand default rules
-      lookupBarcodeAndProcess(side, false); 
+    /* ============== WORKSPACE OPERATION MANAGEMENT ============== */
+    function lookupBarcode(side) {
+      $(side + "-fields-area").classList.add("visible"); // If typed manually, force unhide form fields
+      lookupBarcodeAndProcess(side, false);
     }
 
-    function lookupBarcodeAndProcess(side, isWeightPreParsed) {
-      var barcode = $(side + "-barcode").value.trim();
-      if (!barcode) return;
-      
-      $(side + "-product").value = "";
-      $(side + "-product").placeholder = "Fetching master ledger values...";
+    function lookupBarcodeAndProcess(side, isWeightBarcode) {
+      var bc = $(side + "-barcode").value.trim();
+      if (!bc) return;
+      $(side + "-product").value = ""; $(side + "-product").placeholder = "Searching master records...";
 
-      jsonpRequest({ action: "lookup", barcode: barcode }, function(res){
+      jsonpRequest({ action: "lookup", barcode: bc }, function(res){
         if (res && res.success && res.data) {
           $(side + "-product").value = res.data.name;
           $(side + "-category").value = res.data.category;
-          handlePostScanWorkflow(side, isWeightPreParsed);
+          handleWorkflowSteps(side, isWeightBarcode);
         } else {
-          // New Item Entry Rule — Expand Form controls immediately
-          $(side + "-dynamic-fields").classList.remove("hidden");
-          $(side + "-product").disabled = false;
-          $(side + "-product").value = "";
-          $(side + "-product").placeholder = "Enter Product Name manually";
-          $(side + "-product").focus();
-          setStatus(side, "New product discovered! Add details.", "error");
+          $(side + "-fields-area").classList.add("visible"); // Unhide form so user can manually write name
+          $(side + "-product").disabled = false; $(side + "-product").value = "";
+          $(side + "-product").placeholder = "Enter Product Name manually"; $(side + "-product").focus();
+          setStatus(side, "New item detected! Type description details.", "error");
         }
-      }, function(err){
-        $(side + "-dynamic-fields").classList.remove("hidden");
-        setStatus(side, "Server infrastructure timeout errors.", "error");
+      }, function(e){
+        $(side + "-fields-area").classList.add("visible");
+        setStatus(side, "Server processing communications failed.", "error");
       });
     }
 
-    async function handlePostScanWorkflow(side, isWeightPreParsed) {
-      var productName = $(side + "-product").value;
+    async function handleWorkflowSteps(side, isWeightBarcode) {
+      var pName = $(side + "-product").value;
       
-      if (!isWeightPreParsed) {
-        // STANDARD BARCODE GENERATED FLOWS — SHOW MODAL AND POPUP DYNAMICS
-        var modalInputResult = await showCustomPrompt(
-          productName, 
-          "Enter standard sales item count / tracking quantity to log this execution batch:", 
-          "QUANTITY COUNT",
-          "1"
-        );
-        
-        if (modalInputResult !== null) {
-          var cleanQty = parseFloat(modalInputResult);
-          if (!isNaN(cleanQty) && cleanQty > 0) {
-            $(side + "-qty").value = cleanQty;
+      if (!isWeightBarcode) {
+        // STANDARD BARCODE WORKFLOW — SHOW CLEAN MODAL PROMPT FOR QUICK COUNT INPUT
+        var userCount = await showCustomPrompt(pName, "Enter items quantity count to add into staging list queue:", "QUANTITY PIECES", "1");
+        if (userCount !== null) {
+          var parsed = parseFloat(userCount);
+          if (!isNaN(parsed) && parsed > 0) {
+            $(side + "-qty").value = parsed;
             stageScannedItem(side);
-            // Continuous scanning loop initialization triggers
-            setTimeout(() => startScanner(side), 350);
+            setTimeout(() => startScanner(side), 300); // Fast re-trigger scanner loop
           } else {
-            $(side + "-dynamic-fields").classList.remove("hidden");
-            showCustomAlert("Invalid Entry", "Logs skipped due to wrong numerical inputs.");
+            showCustomAlert("Invalid Number", "Staging discarded due to zero entries.");
           }
-        } else {
-          // If modal operation is explicitly cancelled by active manager
-          $(side + "-dynamic-fields").classList.remove("hidden");
         }
       } else {
-        // WEIGHT DETECTED AUTOMATICALLY FLOWS — BYPASS ALL DIALOG POPUPS FOR MAXIMUM VELOCITY SPEED
+        // WEIGHT DETECTED BARCODE WORKFLOW — BYPASS POPUPS, ADD IMMEDIATELY AT LIGHTNING VELOCITY
         stageScannedItem(side);
-        setTimeout(() => startScanner(side), 350);
+        setTimeout(() => startScanner(side), 300); // Continuous rapid scanning trigger loop
       }
     }
 
@@ -777,89 +641,65 @@
       var qty = parseFloat($(side + "-qty").value);
 
       if (!barcode || !product || isNaN(qty) || qty <= 0) {
-        $(side + "-dynamic-fields").classList.remove("hidden");
-        setStatus(side, "Error: Queue assignment payload structural missing parameters.", "error");
+        $(side + "-fields-area").classList.add("visible");
+        setStatus(side, "Error: Missing product validations parameters.", "error");
         return;
       }
 
-      var itemObject = {
-        type: (side === "in") ? "PRODUCTION" : "DISPATCH",
-        barcode: barcode, category: category, product: product, qty: qty
-      };
-
-      if (side === "in") {
-        productionBatchQueue.push(itemObject);
-      } else {
-        dispatchBatchQueue.push(itemObject);
-      }
+      var item = { type: (side === "in") ? "PRODUCTION" : "DISPATCH", barcode: barcode, category: category, product: product, qty: qty };
+      if (side === "in") productionBatchQueue.push(item); else dispatchBatchQueue.push(item);
 
       updateBatchPreviewDisplay(side);
-      setStatus(side, "Successfully added: " + product, "success");
-      
-      // Clear values but keep layouts hidden for neat workflow
+      setStatus(side, "Staged: " + product + " (x" + qty + ")", "success");
       resetFormFields(side);
     }
 
     function updateBatchPreviewDisplay(side) {
-      var targetQueue = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
-      var targetDiv = $(side + "-batch-preview");
+      var q = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
+      var box = $(side + "-batch-preview");
+      if (q.length === 0) { box.innerHTML = "No scanned items staged yet."; return; }
 
-      if (targetQueue.length === 0) {
-        targetDiv.innerHTML = "No scanned items staged yet.";
-        return;
-      }
-
-      var htmlOutput = "";
-      for (var i = 0; i < targetQueue.length; i++) {
-        var record = targetQueue[i];
-        htmlOutput += `
+      var html = "";
+      for (var i = 0; i < q.length; i++) {
+        html += `
           <div class="batch-item-row">
             <div class="batch-item-left">
-              <strong style="color: var(--text); font-size: 14px;">${record.product}</strong>
-              <span style="color: var(--text-soft); font-size: 11px;">Code: ${record.barcode} | ${record.category}</span>
+              <strong style="color:var(--text); font-size:14px;">${q[i].product}</strong>
+              <span style="color:var(--text-soft); font-size:11px;">Code: ${q[i].barcode} | ${q[i].category}</span>
             </div>
             <div class="batch-item-right">
-              <span style="font-weight: 700; color: #2b2118; font-size: 15px; background: #fdfaf4; padding: 4px 8px; border-radius: 6px; border: 1px solid #f0ebd9;">x${record.qty}</span>
+              <span style="font-weight:700; color:var(--text); font-size:14px; background:#F5ECE1; padding:4px 8px; border-radius:6px;">x${q[i].qty}</span>
               <button class="single-delete-icon-btn" type="button" onclick="deleteSingleEntryItem('${side}', ${i})" title="Remove item">✕</button>
             </div>
           </div>`;
       }
-      targetDiv.innerHTML = htmlOutput;
+      box.innerHTML = html;
     }
 
     async function submitEntireBatch(side) {
-      var targetQueue = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
+      var q = (side === "in") ? productionBatchQueue : dispatchBatchQueue;
+      if (q.length === 0) return setStatus(side, "Staging is completely empty.", "error");
 
-      if (targetQueue.length === 0) {
-        return setStatus(side, "Error: Staging environments workspace is empty.", "error");
-      }
+      var ok = await showCustomConfirm("Push Batch Logs", "Submit total batch collection of " + q.length + " item entries to sheet records?", false);
+      if (!ok) return;
 
-      var verification = await showCustomConfirm("Finalize & Submit Logs", "Push this production batch collection of " + targetQueue.length + " item entries to the cloud sheet?", false);
-      if (!verification) return;
-
-      setStatus(side, "Transmitting transaction batch arrays to database...", "");
-      var payloadString = JSON.stringify(targetQueue);
-
-      jsonpRequest({ action: "saveBatch", batch: payloadString }, function(res){
+      setStatus(side, "Uploading transaction blocks arrays...", "");
+      jsonpRequest({ action: "saveBatch", batch: JSON.stringify(q) }, function(res){
         if (res && res.success) {
-          setStatus(side, "Data uploaded successfully into database records!", "success");
+          setStatus(side, "Batch logged into database!", "success");
           clearBatchQueue(side);
-          $(side + "-dynamic-fields").classList.remove("hidden");
+          $(side + "-fields-area").classList.remove("visible");
           setTimeout(() => showScreen('menu'), 1000);
         } else {
-          $(side + "-dynamic-fields").classList.remove("hidden");
-          setStatus(side, "Database submission failure.", "error");
+          setStatus(side, "Submission handling broken on server.", "error");
         }
-      }, function(err){
-        $(side + "-dynamic-fields").classList.remove("hidden");
-        setStatus(side, "Handshake server connection timeouts.", "error");
-      });
+      }, function(e){ setStatus(side, "Network communication pipeline timeout.", "error"); });
     }
 
     function adjustQty(side, d){
       var el = $(side + "-qty");
-      var currentVal = parseFloat(el.value) || 0;
-      el.value = Math.max(0, currentVal + d);
+      var v = parseFloat(el.value) || 0;
+      el.value = Math.max(0, v + d);
     }
 
     function setStatus(side, msg, type) { 
