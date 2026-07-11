@@ -17,6 +17,8 @@
       --green-soft:#DFE8D5;
       --terracotta:#A63C19;
       --terracotta-soft:#F5DFD6;
+      --navy:#2C4A5E;
+      --navy-soft:#DCE6EA;
       --radius:16px;
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -27,7 +29,8 @@
     header h1{ font-family:'Fraunces',serif; font-size:24px; font-weight:600; margin:0; color:var(--text); }
     header p{ margin:3px 0 0; font-size:13px; color:var(--text-soft); font-weight: 500; }
 
-    #menu-screen{ display:flex; gap:12px; margin-top:10px; }
+    #menu-screen{ display:flex; flex-direction:column; gap:12px; margin-top:10px; }
+    #menu-top-row{ display:flex; gap:12px; }
     .menu-btn{
       display:flex; flex-direction:column; align-items:center; justify-content:center;
       padding:26px 10px; border:none; border-radius:var(--radius); cursor:pointer; color:#fff; flex:1;
@@ -35,14 +38,17 @@
     }
     .menu-btn.inward{ background:var(--green); }
     .menu-btn.outward{ background:var(--terracotta); }
+    .menu-btn.supervisor{ background:var(--navy); width:100%; padding:16px 10px; }
     .menu-btn:active{ transform: scale(0.97); opacity:0.95; }
     .menu-btn-title{ font-family:'Fraunces',serif; font-size:18px; font-weight:600; }
+    .menu-btn.supervisor .menu-btn-title{ font-size:15px; }
 
     /* DASHBOARD PANEL CONTAINER */
     .dashboard-panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.04); }
     .panel-head{ display:flex; align-items:center; gap:8px; padding:14px 16px; font-family:'Fraunces',serif; font-size:18px; font-weight:600; border-bottom:1px solid var(--border); }
     .dashboard-panel.inward .panel-head{ background:var(--green-soft); color:var(--green); }
     .dashboard-panel.outward .panel-head{ background:var(--terracotta-soft); color:var(--terracotta); }
+    .dashboard-panel.supervisor .panel-head{ background:var(--navy-soft); color:var(--navy); }
     .back-btn{ border:none; background:none; font-size:22px; cursor:pointer; color:inherit; padding:2px 8px; font-weight: bold; }
     .panel-body{ padding:16px; display:flex; flex-direction:column; gap:14px; }
 
@@ -103,10 +109,47 @@
       cursor: pointer; background: #261E16; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .master-submit-btn:active { opacity: 0.92; transform: translateY(1px); }
+    .master-submit-btn.navy-btn{ background: var(--navy); }
     
     .status-msg-bar{ min-height:18px; font-size:13px; font-weight: 600; text-align: center; }
     .status-msg-bar.success{ color:var(--green); }
     .status-msg-bar.error{ color:var(--terracotta); }
+
+    /* SUPERVISOR: SEARCH + STOCK LIST */
+    .supervisor-search-input{
+      width:100%; padding:11px 14px; border:1px solid var(--border); border-radius:10px;
+      font-size:14px; font-family:inherit; background:#fff; color:var(--text); outline:none;
+    }
+    .stock-row{ cursor:pointer; }
+    .stock-row:active{ opacity:0.7; }
+    .stock-badge{
+      font-weight:700; color:var(--navy); background:#EAF1F4; padding:5px 10px;
+      border-radius:8px; font-size:14px; min-width:34px; text-align:center;
+    }
+    .stock-badge.low{ color:#9E2F11; background:#F5DFD6; }
+    .chevron-icon{ color:var(--text-soft); font-size:14px; }
+
+    /* SUPERVISOR: ITEM HISTORY VIEW */
+    #supervisor-history-view{ display:none; flex-direction:column; gap:12px; }
+    .history-item-header{
+      background:var(--navy-soft); border-radius:12px; padding:12px 14px;
+      display:flex; flex-direction:column; gap:2px;
+    }
+    .history-item-header strong{ font-family:'Fraunces',serif; font-size:17px; color:var(--navy); }
+    .history-item-header span{ font-size:12px; color:var(--text-soft); font-weight:600; }
+    .history-item-header .current-stock-line{ font-size:13.5px; color:var(--navy); font-weight:700; margin-top:4px; }
+    .txn-row{
+      display:flex; justify-content:space-between; align-items:center;
+      font-size:13px; padding:10px 0; border-bottom:1px dashed var(--border);
+    }
+    .txn-row:last-child{ border-bottom:none; }
+    .txn-left{ display:flex; flex-direction:column; gap:2px; }
+    .txn-type-tag{ font-weight:700; font-size:13px; }
+    .txn-type-tag.prod{ color:var(--green); }
+    .txn-type-tag.disp{ color:var(--terracotta); }
+    .txn-qty-change{ font-weight:700; font-size:14px; padding:4px 9px; border-radius:6px; }
+    .txn-qty-change.prod{ color:var(--green); background:var(--green-soft); }
+    .txn-qty-change.disp{ color:var(--terracotta); background:var(--terracotta-soft); }
 
     /* CAMERA VIEWFINDER FRAME MODAL OVERLAY */
     #scanner-modal{ position:fixed; inset:0; background:#000; z-index:9999; display:none; }
@@ -170,11 +213,16 @@
     </header>
 
     <div id="menu-screen">
-      <button class="menu-btn inward" type="button" onclick="openDashboardScreen('in')">
-        <span class="menu-btn-title">Production (PROD)</span>
-      </button>
-      <button class="menu-btn outward" type="button" onclick="openDashboardScreen('out')">
-        <span class="menu-btn-title">Dispatch (DISP)</span>
+      <div id="menu-top-row">
+        <button class="menu-btn inward" type="button" onclick="openDashboardScreen('in')">
+          <span class="menu-btn-title">Production (PROD)</span>
+        </button>
+        <button class="menu-btn outward" type="button" onclick="openDashboardScreen('out')">
+          <span class="menu-btn-title">Dispatch (DISP)</span>
+        </button>
+      </div>
+      <button class="menu-btn supervisor" type="button" onclick="openSupervisorDashboard()">
+        <span class="menu-btn-title">📊 Supervisor Stock Dashboard</span>
       </button>
     </div>
 
@@ -209,6 +257,38 @@
         <button class="master-submit-btn" type="button" onclick="submitEntireDeskBatch()">🚀 Confirm & Final Submit Batch</button>
         
         <div id="dashboard-status-log" class="status-msg-bar"></div>
+      </div>
+    </div>
+
+    <!-- ============== SUPERVISOR STOCK DASHBOARD ============== -->
+    <div id="supervisor-dashboard" class="dashboard-panel supervisor" hidden>
+      <div class="panel-head">
+        <button class="back-btn" type="button" onclick="exitSupervisorDashboard()">←</button>
+        <span>Supervisor Stock Dashboard</span>
+      </div>
+
+      <div class="panel-body">
+
+        <!-- VIEW 1: STOCK LIST -->
+        <div id="supervisor-stock-view">
+          <input id="supervisor-search-input" class="supervisor-search-input" type="text"
+                 placeholder="Search item name or code..." oninput="filterStockList(this.value)">
+
+          <button class="master-submit-btn navy-btn" type="button" style="margin-top:12px;" onclick="loadStockList()">🔄 Refresh Stock List</button>
+
+          <label class="history-section-label" style="margin-top:12px;">Item Wise Current Stock (tap item for history)</label>
+          <div id="supervisor-stock-list" class="history-scroll-box" style="max-height:340px;">Loading...</div>
+        </div>
+
+        <!-- VIEW 2: ITEM HISTORY -->
+        <div id="supervisor-history-view">
+          <button class="back-btn" type="button" style="align-self:flex-start; padding-left:0;" onclick="backToStockList()">← Back to Stock List</button>
+          <div id="history-item-header" class="history-item-header"></div>
+          <label class="history-section-label">Full Transaction History</label>
+          <div id="supervisor-history-list" class="history-scroll-box" style="max-height:340px;">Loading...</div>
+        </div>
+
+        <div id="supervisor-status" class="status-msg-bar"></div>
       </div>
     </div>
   </div>
@@ -560,14 +640,15 @@
         return;
       }
 
-      if (!confirm("Are you sure you want to push this total transaction batch array containing " + centralBatchCollection.length + " logged line items?")) return;
+      if (!confirm("Are you sure you want to push this total transaction batch array containing " + centralBatchCollection.length + " logged line items?\n\nStock will be auto " +
+        (currentActiveMode === "in" ? "increased (+)" : "reduced (-)") + " for each item.")) return;
 
       setLogStatus("Uploading records payload package to Cloud Sheets server...", "");
       var serializedBatch = JSON.stringify(centralBatchCollection);
 
       executeJsonpTransfer({ action: "saveBatch", batch: serializedBatch }, function(res){
         if (res && res.success) {
-          alert("All entries pushed successfully!");
+          alert("All entries pushed successfully! Stock updated (" + (currentActiveMode === "in" ? "+" : "-") + " applied).");
           centralBatchCollection = [];
           refreshHistoryLogDisplay();
           exitDashboardScreen();
@@ -582,6 +663,138 @@
       if(!bar) return;
       bar.innerText = msg;
       bar.className = "status-msg-bar " + classification;
+    }
+
+    /* ============================================================
+       ============== SUPERVISOR STOCK DASHBOARD ==================
+       ============================================================ */
+    var supervisorStockCache = [];
+
+    function openSupervisorDashboard() {
+      $("menu-screen").hidden = true;
+      $("supervisor-dashboard").hidden = false;
+      backToStockList(); // ensure list view shown first
+      loadStockList();
+    }
+
+    function exitSupervisorDashboard() {
+      $("supervisor-dashboard").hidden = true;
+      $("menu-screen").hidden = false;
+      supervisorStockCache = [];
+      $("supervisor-search-input").value = "";
+    }
+
+    function setSupervisorStatus(msg, classification) {
+      var bar = $("supervisor-status");
+      if (!bar) return;
+      bar.innerText = msg;
+      bar.className = "status-msg-bar " + (classification || "");
+    }
+
+    function loadStockList() {
+      $("supervisor-stock-list").innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">Loading stock list...</div>';
+      setSupervisorStatus("Fetching live stock from Cloud Sheet...", "");
+
+      executeJsonpTransfer({ action: "getStockList" }, function(res){
+        if (res && res.success) {
+          supervisorStockCache = res.data || [];
+          renderStockList(supervisorStockCache);
+          setSupervisorStatus("Stock list updated. " + supervisorStockCache.length + " items loaded.", "success");
+        } else {
+          setSupervisorStatus("Failed to load stock list.", "error");
+        }
+      }, function(e){ setSupervisorStatus("Stock list connection timeout.", "error"); });
+    }
+
+    function filterStockList(query) {
+      var q = (query || "").trim().toLowerCase();
+      if (!q) { renderStockList(supervisorStockCache); return; }
+      var filtered = supervisorStockCache.filter(function(item){
+        return (item.name && item.name.toLowerCase().indexOf(q) !== -1) ||
+               (item.barcode && String(item.barcode).toLowerCase().indexOf(q) !== -1) ||
+               (item.category && item.category.toLowerCase().indexOf(q) !== -1);
+      });
+      renderStockList(filtered);
+    }
+
+    function renderStockList(list) {
+      var box = $("supervisor-stock-list");
+      if (!list || list.length === 0) {
+        box.innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">No items found.</div>';
+        return;
+      }
+      var html = "";
+      for (var i = 0; i < list.length; i++) {
+        var item = list[i];
+        var lowFlag = item.stock <= 0;
+        html += `
+          <div class="history-row stock-row" onclick="showItemHistory('${item.barcode}', '${item.name.replace(/'/g, "\\'")}')">
+            <div class="history-left">
+              <strong style="color:var(--text); font-size:14px;">${item.name}</strong>
+              <span style="color:var(--text-soft); font-size:11px;">Code: ${item.barcode} | ${item.category}</span>
+            </div>
+            <div class="history-right">
+              <span class="stock-badge${lowFlag ? ' low' : ''}">${item.stock}</span>
+              <span class="chevron-icon">›</span>
+            </div>
+          </div>`;
+      }
+      box.innerHTML = html;
+    }
+
+    function showItemHistory(barcode, name) {
+      $("supervisor-stock-view").style.display = "none";
+      $("supervisor-history-view").style.display = "flex";
+
+      var matched = supervisorStockCache.find(function(it){ return it.barcode === barcode; });
+      var currentStock = matched ? matched.stock : "—";
+      var category = matched ? matched.category : "";
+
+      $("history-item-header").innerHTML = `
+        <strong>${name}</strong>
+        <span>Code: ${barcode} | ${category}</span>
+        <span class="current-stock-line">Current Stock: ${currentStock}</span>`;
+
+      $("supervisor-history-list").innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">Loading history...</div>';
+      setSupervisorStatus("Fetching item history...", "");
+
+      executeJsonpTransfer({ action: "getItemHistory", barcode: barcode }, function(res){
+        if (res && res.success) {
+          renderItemHistory(res.data || []);
+          setSupervisorStatus("History loaded for " + name + ".", "success");
+        } else {
+          $("supervisor-history-list").innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">Could not load history.</div>';
+          setSupervisorStatus("Failed to load item history.", "error");
+        }
+      }, function(e){ setSupervisorStatus("History connection timeout.", "error"); });
+    }
+
+    function renderItemHistory(historyList) {
+      var box = $("supervisor-history-list");
+      if (!historyList || historyList.length === 0) {
+        box.innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">No transactions recorded yet for this item.</div>';
+        return;
+      }
+      var html = "";
+      for (var i = 0; i < historyList.length; i++) {
+        var txn = historyList[i];
+        var isProd = txn.type === "PRODUCTION";
+        var branchLine = txn.branch ? (" | Branch: " + txn.branch) : "";
+        html += `
+          <div class="txn-row">
+            <div class="txn-left">
+              <span class="txn-type-tag ${isProd ? 'prod' : 'disp'}">${isProd ? '⬆ PRODUCTION' : '⬇ DISPATCH'}</span>
+              <span style="color:var(--text-soft); font-size:11px;">${txn.timestamp}${branchLine}</span>
+            </div>
+            <span class="txn-qty-change ${isProd ? 'prod' : 'disp'}">${isProd ? '+' : '-'}${txn.qty}</span>
+          </div>`;
+      }
+      box.innerHTML = html;
+    }
+
+    function backToStockList() {
+      $("supervisor-history-view").style.display = "none";
+      $("supervisor-stock-view").style.display = "block";
     }
   </script>
 </body>
