@@ -221,9 +221,6 @@
           <span class="menu-btn-title">Dispatch (DISP)</span>
         </button>
       </div>
-      <button class="menu-btn supervisor" type="button" onclick="openSupervisorDashboard()">
-        <span class="menu-btn-title">📊 Supervisor Stock Dashboard</span>
-      </button>
     </div>
 
     <div id="desk-dashboard" class="dashboard-panel" hidden>
@@ -796,6 +793,23 @@
       $("supervisor-history-view").style.display = "none";
       $("supervisor-stock-view").style.display = "block";
     }
+
+    /* ============================================================
+       DIRECT-LINK SUPPORT (GitHub Pages):
+       Open this page as
+       https://misraghuvirsweets.github.io/SacnInventory/?view=supervisor
+       to jump straight into the Supervisor Dashboard.
+       The normal link (no query param) only ever shows
+       Production / Dispatch — the Supervisor option is not on
+       the main menu at all.
+       ============================================================ */
+    var urlParamsForView = new URLSearchParams(window.location.search);
+    var INITIAL_VIEW = urlParamsForView.get('view');
+    window.addEventListener('DOMContentLoaded', function () {
+      if (INITIAL_VIEW === 'supervisor') {
+        openSupervisorDashboard();
+      }
+    });
   </script>
 </body>
 </html>
