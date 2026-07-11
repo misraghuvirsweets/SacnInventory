@@ -46,6 +46,20 @@
     .back-btn{ border:none; background:none; font-size:22px; cursor:pointer; color:inherit; padding:2px 8px; font-weight: bold; }
     .panel-body{ padding:16px; display:flex; flex-direction:column; gap:14px; }
 
+    /* BRANCH SELECTOR — DISPATCH ONLY */
+    #branch-select-section{ display:none; }
+    .branch-btn-row{ display:flex; gap:8px; margin-top:6px; }
+    .branch-select-btn{
+      flex:1; padding:11px 4px; border-radius:10px; font-size:13px; font-weight:700;
+      font-family:inherit; cursor:pointer; border:2px solid var(--terracotta);
+      background:#fff; color:var(--terracotta); transition: all 0.15s;
+    }
+    .branch-select-btn.active{ background:var(--terracotta); color:#fff; }
+    .branch-select-btn:active{ transform: scale(0.96); }
+    .branch-current-tag{
+      font-size:12.5px; font-weight:600; color:var(--terracotta); text-align:center; margin-top:2px;
+    }
+
     /* BIG TAP TO SCAN CONTROL BUTTON */
     .giant-scan-box {
       width: 100%; padding: 28px 16px; text-align: center;
@@ -58,6 +72,7 @@
     .dashboard-panel.inward .giant-scan-box { color: var(--green); border-color: var(--green); background: var(--green-soft); }
     .dashboard-panel.outward .giant-scan-box { color: var(--terracotta); border-color: var(--terracotta); background: var(--terracotta-soft); }
     .giant-scan-box:active { transform: scale(0.96); }
+    .giant-scan-box.disabled { opacity: 0.45; pointer-events: none; }
 
     /* SCANNED HISTORY PANEL CONTAINER */
     .history-section-label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-soft); font-weight:700; margin-top: 4px; }
@@ -170,7 +185,18 @@
       </div>
       
       <div class="panel-body">
-        <div class="giant-scan-box" onclick="triggerLiveScanner()">
+
+        <div id="branch-select-section">
+          <label class="history-section-label">Select Dispatch Branch</label>
+          <div class="branch-btn-row">
+            <button class="branch-select-btn" type="button" data-branch="Ram Mandir" onclick="selectBranch('Ram Mandir')">Ram Mandir</button>
+            <button class="branch-select-btn" type="button" data-branch="Vishrambagh" onclick="selectBranch('Vishrambagh')">Vishrambagh</button>
+            <button class="branch-select-btn" type="button" data-branch="Miraj" onclick="selectBranch('Miraj')">Miraj</button>
+          </div>
+          <div id="branch-current-tag" class="branch-current-tag"></div>
+        </div>
+
+        <div id="scan-box-wrapper" class="giant-scan-box" onclick="triggerLiveScanner()">
           <strong>⚡ TAP TO SCAN BARCODE</strong>
           <span>Camera viewfinder opens automatically</span>
         </div>
@@ -225,6 +251,7 @@
     var currentActiveMode = null; 
     var centralBatchCollection = []; 
     var currentScannedPayload = null; 
+    var selectedBranchName = null; // ONLY used for Dispatch (out) mode
 
     /* ============== JSONP ENGINE FOR WEB APPLICATIONS ============== */
     var jsonpCounter = 0;
@@ -250,11 +277,22 @@
     function openDashboardScreen(mode) {
       currentActiveMode = mode;
       centralBatchCollection = [];
+      selectedBranchName = null;
       $("menu-screen").hidden = true;
       $("desk-dashboard").hidden = false;
       $("desk-dashboard").className = "dashboard-panel " + (mode === "in" ? "inward" : "outward");
       $("dashboard-title-label").innerText = mode === "in" ? "Production Dashboard Unit" : "Dispatch Dashboard Unit";
-      
+
+      // BRANCH SELECTOR VISIBLE ONLY FOR DISPATCH (OUT) MODE
+      if (mode === "out") {
+        $("branch-select-section").style.display = "block";
+        updateBranchButtonStates();
+        updateScanBoxLockState();
+      } else {
+        $("branch-select-section").style.display = "none";
+        updateScanBoxLockState();
+      }
+
       refreshHistoryLogDisplay();
       setLogStatus("Dashboard Workspace Initiated.", "success");
     }
@@ -262,8 +300,39 @@
     function exitDashboardScreen() {
       currentActiveMode = null;
       centralBatchCollection = [];
+      selectedBranchName = null;
       $("desk-dashboard").hidden = true;
       $("menu-screen").hidden = false;
+    }
+
+    /* ============== BRANCH SELECTOR CONTROLLER (DISPATCH ONLY) ============== */
+    function selectBranch(branchName) {
+      selectedBranchName = branchName;
+      updateBranchButtonStates();
+      updateScanBoxLockState();
+      setLogStatus("Branch set to: " + branchName, "success");
+    }
+
+    function updateBranchButtonStates() {
+      var buttons = document.querySelectorAll(".branch-select-btn");
+      buttons.forEach(function(btn){
+        if (btn.getAttribute("data-branch") === selectedBranchName) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+      var tag = $("branch-current-tag");
+      tag.innerText = selectedBranchName ? ("Selected: " + selectedBranchName) : "Please select a branch to begin scanning.";
+    }
+
+    function updateScanBoxLockState() {
+      var scanBox = $("scan-box-wrapper");
+      if (currentActiveMode === "out" && !selectedBranchName) {
+        scanBox.classList.add("disabled");
+      } else {
+        scanBox.classList.remove("disabled");
+      }
     }
 
     /* ============== HISTORY GRID CONTROLLER WITH INDIVIDUAL DELETE ============== */
@@ -283,11 +352,12 @@
       var htmlRowsGrid = "";
       for (var i = 0; i < centralBatchCollection.length; i++) {
         var entry = centralBatchCollection[i];
+        var branchLine = entry.branch ? (" | Branch: " + entry.branch) : "";
         htmlRowsGrid += `
           <div class="history-row">
             <div class="history-left">
               <strong style="color:var(--text); font-size:14px;">${entry.product}</strong>
-              <span style="color:var(--text-soft); font-size:11px;">Code: ${entry.barcode} | ${entry.category}</span>
+              <span style="color:var(--text-soft); font-size:11px;">Code: ${entry.barcode} | ${entry.category}${branchLine}</span>
             </div>
             <div class="history-right">
               <span style="font-weight:700; color:var(--text); font-size:14px; background:#F2E8DB; padding:4px 8px; border-radius:6px;">x${entry.qty}</span>
@@ -307,6 +377,11 @@
     var DETECT_READERS = ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "code_39_reader"];
 
     function triggerLiveScanner() {
+      // GUARD: DISPATCH MODE REQUIRES A BRANCH TO BE SELECTED FIRST
+      if (currentActiveMode === "out" && !selectedBranchName) {
+        alert("Please select a Branch (Ram Mandir / Vishrambagh / Miraj) before scanning.");
+        return;
+      }
       if ($("scanner-modal").classList.contains("active")) return;
       trackingSequence = [];
       $("scanner-modal").classList.add("active");
@@ -468,7 +543,9 @@
         barcode: currentScannedPayload.barcode,
         category: currentScannedPayload.category,
         product: currentScannedPayload.product,
-        qty: quantityToLog
+        qty: quantityToLog,
+        // BRANCH ONLY APPLIES TO DISPATCH ENTRIES; PRODUCTION STAYS BLANK
+        branch: (currentActiveMode === "out") ? selectedBranchName : ""
       };
 
       centralBatchCollection.push(itemObject);
