@@ -755,7 +755,7 @@
       $("supervisor-history-list").innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">Loading history...</div>';
       setSupervisorStatus("Fetching item history...", "");
 
-      executeJsonpTransfer({ action: "getItemHistory", barcode: barcode }, function(res){
+      executeJsonpTransfer({ action: "getItemHistory", barcode: barcode, name: name }, function(res){
         if (res && res.success) {
           renderItemHistory(res.data || []);
           setSupervisorStatus("History loaded for " + name + ".", "success");
