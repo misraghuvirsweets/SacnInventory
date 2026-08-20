@@ -119,7 +119,7 @@
     }
     .scanner-guide-box {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-      width: 75%; max-width: 320px; height: 110px; border: 3px solid var(--green);
+      width: 80%; max-width: 300px; height: 120px; border: 3px solid var(--green);
       border-radius: 12px; box-shadow: 0 0 0 2000px rgba(0,0,0,0.55); z-index: 2; pointer-events: none;
     }
 
@@ -534,7 +534,7 @@
       miniBox.innerHTML = miniHtml;
     }
 
-    /* CAMERA SCANNER HANDLER */
+    /* CAMERA SCANNER HANDLER WITH RESTRICTED TARGET RECTANGLE AREA */
     var scannerRunning = false;
     function triggerLiveScanner() {
       if ($("scanner-modal").classList.contains("active")) return;
@@ -542,7 +542,18 @@
       $("scanner-modal").classList.add("active");
       
       Quagga.init({
-        inputStream: { name: "Live", type: "LiveStream", target: document.querySelector("#scanner-viewport"), constraints: { facingMode: "environment", width: 1280, height: 720 } },
+        inputStream: { 
+          name: "Live", 
+          type: "LiveStream", 
+          target: document.querySelector("#scanner-viewport"), 
+          constraints: { facingMode: "environment", width: 1280, height: 720 },
+          area: { // Restrict barcode detection specifically to target box area
+            top: "30%",    
+            right: "10%",  
+            left: "10%",   
+            bottom: "30%"  
+          }
+        },
         locator: { patchSize: "medium", halfSample: false },
         decoder: { readers: ["code_128_reader", "ean_reader", "code_39_reader"] }
       }, function(err){ if(!err) { Quagga.start(); scannerRunning = true; } });
