@@ -230,7 +230,7 @@
     var selectedBranchName = null;
     var scanCountdownInterval = null;
     var cameraTimerInterval = null;
-    var isCameraScanCooldown = false;
+    var isScanOnCooldown = false; // Prevents all scans (Bluetooth + Camera) during timer
 
     /* BLUETOOTH SCANNER HANDLER */
     var bluetoothBuffer = "";
@@ -239,6 +239,9 @@
     window.addEventListener("keydown", function(e) {
       if (!selectedBranchName) return;
       if (document.activeElement && document.activeElement.tagName === "INPUT") return;
+
+      // Block Bluetooth scans if 3-second countdown timer is active
+      if (isScanOnCooldown) return;
 
       if (e.key === "Enter") {
         if (bluetoothBuffer.trim().length > 0) {
@@ -253,6 +256,7 @@
     });
 
     function start3SecondScanTimer() {
+      isScanOnCooldown = true;
       var badge = $("scan-timer-badge");
       var countEl = $("scan-timer-count");
       var secondsLeft = 3;
@@ -267,6 +271,7 @@
         if (secondsLeft <= 0) {
           clearInterval(scanCountdownInterval);
           badge.classList.remove("active");
+          isScanOnCooldown = false; // Reactivates scanning!
         } else {
           countEl.innerText = secondsLeft;
         }
@@ -459,7 +464,7 @@
         return;
       }
       if ($("scanner-modal").classList.contains("active")) return;
-      isCameraScanCooldown = false;
+      isScanOnCooldown = false;
       $("scanner-modal").classList.add("active");
 
       Quagga.init({
@@ -471,11 +476,10 @@
     }
 
     function onQuaggaFrameHit(resultData) {
-      if (!scannerRunning || isCameraScanCooldown) return;
+      if (!scannerRunning || isScanOnCooldown) return;
       
       var rawStringCode = resultData.codeResult.code;
       if (rawStringCode) {
-        isCameraScanCooldown = true;
         evaluateIncomingScannedCode(rawStringCode);
         
         var parsed = parseCustomBarcode(rawStringCode);
@@ -500,7 +504,6 @@
         if (timeLeft <= 0) {
           clearInterval(cameraTimerInterval);
           timerOverlay.classList.remove("active");
-          isCameraScanCooldown = false; // Automatically reactivates scanner!
         } else {
           timerCount.innerText = timeLeft;
         }
@@ -509,7 +512,7 @@
 
     function terminateLiveScanner() {
       scannerRunning = false;
-      isCameraScanCooldown = false;
+      isScanOnCooldown = false;
       if (cameraTimerInterval) clearInterval(cameraTimerInterval);
       $("camera-timer-overlay").classList.remove("active");
       try { Quagga.offDetected(onQuaggaFrameHit); Quagga.stop(); } catch(e){}
