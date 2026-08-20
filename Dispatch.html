@@ -29,7 +29,6 @@
     .panel-head{ display:flex; align-items:center; justify-content:center; padding:14px 16px; font-family:'Fraunces',serif; font-size:18px; font-weight:600; border-bottom:1px solid var(--border); background:var(--terracotta-soft); color:var(--terracotta); }
     .panel-body{ padding:16px; display:flex; flex-direction:column; gap:14px; }
 
-    /* BRANCH SELECTOR (RAM MANDIR & VISHRAMBAGH ONLY) */
     .branch-btn-row{ display:flex; gap:8px; margin-top:6px; }
     .branch-select-btn{
       flex:1; padding:11px 4px; border-radius:10px; font-size:13px; font-weight:700;
@@ -38,9 +37,17 @@
     }
     .branch-select-btn.active{ background:var(--terracotta); color:#fff; }
     .branch-select-btn:active{ transform: scale(0.96); }
-    .branch-current-tag{
-      font-size:12.5px; font-weight:600; color:var(--terracotta); text-align:center; margin-top:2px;
+    .branch-current-tag{ font-size:12.5px; font-weight:600; color:var(--terracotta); text-align:center; margin-top:2px; }
+
+    /* 3-SECOND TIMER OVERLAY BADGE */
+    .timer-badge-display {
+      display: none; align-items: center; justify-content: center; gap: 8px;
+      background: var(--terracotta); color: #fff; padding: 10px 16px; border-radius: 10px;
+      font-size: 15px; font-weight: 700; text-align: center;
+      box-shadow: 0 4px 12px rgba(166,60,25,0.25); animation: pulseTimer 0.6s infinite alternate;
     }
+    .timer-badge-display.active { display: flex; }
+    @keyframes pulseTimer { from { transform: scale(0.98); } to { transform: scale(1.02); } }
 
     .giant-scan-box {
       width: 100%; padding: 24px 16px; text-align: center;
@@ -56,7 +63,7 @@
     .history-section-label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-soft); font-weight:700; margin-top: 4px; }
     .history-scroll-box {
       border: 1px solid var(--border); border-radius: 12px; background: #FAF7F2; 
-      max-height: 250px; overflow-y: auto; padding: 2px 12px;
+      max-height: 280px; overflow-y: auto; padding: 2px 12px;
     }
     .history-row {
       display: flex; justify-content: space-between; align-items: center;
@@ -122,10 +129,8 @@
     .popup-input-field { width: 100%; padding: 4px; font-size: 26px; font-weight: 700; border: none; background: transparent; text-align: center; color: var(--text); outline: none; font-family: inherit; }
     
     .popup-action-column { display: flex; flex-direction: column; gap: 10px; }
-    .popup-action-row-top { display: flex; gap: 10px; }
     .popup-action-btn { padding: 13px; border: none; border-radius: 10px; font-size: 14.5px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: center; }
-    .popup-action-btn.cancel { flex: 1; background: #EFE9DE; color: var(--text); }
-    .popup-action-btn.add-next { flex: 1; background: #261E16; color: #fff; }
+    .popup-action-btn.cancel { background: #EFE9DE; color: var(--text); }
     .popup-action-btn.done { width: 100%; background: var(--terracotta); color: #fff; }
   </style>
 </head>
@@ -151,9 +156,14 @@
           <div id="branch-current-tag" class="branch-current-tag">Please select a branch to begin scanning.</div>
         </div>
 
+        <div id="scan-timer-badge" class="timer-badge-display">
+          <span>⏱ Next Scan Ready In:</span>
+          <span id="scan-timer-count">3</span>s
+        </div>
+
         <div id="scan-box-wrapper" class="giant-scan-box disabled" onclick="triggerLiveScanner()">
-          <strong>⚡ TAP TO SCAN OR USE BLUETOOTH SCANNER</strong>
-          <span>Camera Scanner / Bluetooth HID Mode Barcode</span>
+          <strong>⚡ BLUETOOTH SCANNER READY</strong>
+          <span>Scan Barcode Directly or Tap for Camera</span>
         </div>
 
         <div style="margin-top: 2px;">
@@ -179,19 +189,16 @@
   <div id="dashboard-popup-backdrop" class="dashboard-popup-backdrop">
     <div class="dashboard-popup-card">
       <h3 id="pop-product-name" class="popup-item-title">Product Description</h3>
-      <div id="pop-product-cat" class="popup-item-category">Bakery</div>
+      <div id="pop-product-cat" class="popup-item-category">Category</div>
       
       <div class="popup-input-container">
-        <label>Enter Weight / Quantity</label>
+        <label>Enter Weight / Quantity (kg)</label>
         <input id="pop-qty-input" class="popup-input-field" type="number" step="any" value="1">
       </div>
 
       <div class="popup-action-column">
-        <div class="popup-action-row-top">
-          <button class="popup-action-btn cancel" type="button" onclick="closeDashboardPopupCard('cancel')">Cancel</button>
-          <button class="popup-action-btn add-next" type="button" onclick="closeDashboardPopupCard('add_next')">➕ ADD & NEXT SCAN</button>
-        </div>
-        <button class="popup-action-btn done" type="button" onclick="closeDashboardPopupCard('done')">✔️ DONE</button>
+        <button class="popup-action-btn done" type="button" onclick="closeDashboardPopupCard('done')">✔️ ADD ITEM</button>
+        <button class="popup-action-btn cancel" type="button" onclick="closeDashboardPopupCard('cancel')">Cancel</button>
       </div>
     </div>
   </div>
@@ -205,8 +212,9 @@
     var centralBatchCollection = []; 
     var currentScannedPayload = null; 
     var selectedBranchName = null;
+    var scanCountdownInterval = null;
 
-    /* BLUETOOTH HID BARCODE SCANNER HANDLER */
+    /* HIGH SPEED BLUETOOTH SCANNER HANDLER */
     var bluetoothBuffer = "";
     var bluetoothTimer = null;
 
@@ -222,9 +230,30 @@
       } else if (e.key.length === 1) {
         bluetoothBuffer += e.key;
         clearTimeout(bluetoothTimer);
-        bluetoothTimer = setTimeout(function() { bluetoothBuffer = ""; }, 200);
+        bluetoothTimer = setTimeout(function() { bluetoothBuffer = ""; }, 100);
       }
     });
+
+    function start3SecondScanTimer() {
+      var badge = $("scan-timer-badge");
+      var countEl = $("scan-timer-count");
+      var secondsLeft = 3;
+
+      if (scanCountdownInterval) clearInterval(scanCountdownInterval);
+      
+      countEl.innerText = secondsLeft;
+      badge.classList.add("active");
+
+      scanCountdownInterval = setInterval(function() {
+        secondsLeft--;
+        if (secondsLeft <= 0) {
+          clearInterval(scanCountdownInterval);
+          badge.classList.remove("active");
+        } else {
+          countEl.innerText = secondsLeft;
+        }
+      }, 1000);
+    }
 
     var jsonpCounter = 0;
     function executeJsonpTransfer(params, successCallback, failureCallback) {
@@ -260,10 +289,117 @@
       setLogStatus("Branch destination set to " + branchName, "success");
     }
 
+    /* BARCODE PARSER: Skips '#' -> Code = 4 chars (R271) -> Weight = Remaining (00750 -> 0.750) */
+    function parseCustomBarcode(rawCode) {
+      var cleanCode = String(rawCode).trim().replace(/^#+/, '');
+      
+      if (cleanCode.length <= 4) {
+        return { itemCode: cleanCode, weight: null };
+      }
+
+      var itemCode = cleanCode.substring(0, 4);
+      var weightStr = cleanCode.substring(4);
+      var weightVal = 0;
+
+      if (weightStr.length >= 3) {
+        var baseStr = weightStr.padStart(4, '0');
+        var integerPart = baseStr.slice(0, -3);
+        var decimalPart = baseStr.slice(-3);
+        weightVal = parseFloat(integerPart + "." + decimalPart);
+      } else {
+        weightVal = parseFloat(weightStr);
+      }
+
+      return {
+        itemCode: itemCode,
+        weight: isNaN(weightVal) ? null : weightVal
+      };
+    }
+
+    function evaluateIncomingScannedCode(rawCodeString) {
+      if (!selectedBranchName) return;
+      if (navigator.vibrate) navigator.vibrate(50);
+      
+      start3SecondScanTimer();
+
+      var parsed = parseCustomBarcode(rawCodeString);
+      var itemCode = parsed.itemCode;
+      var extractedWeight = parsed.weight;
+
+      currentScannedPayload = {
+        barcode: itemCode,
+        qty: extractedWeight !== null ? extractedWeight : 1,
+        isWeightBarcode: extractedWeight !== null,
+        product: "Code: " + itemCode,
+        category: "Loading..."
+      };
+
+      setLogStatus("⚡ Fetching item: " + itemCode + "...", "success");
+
+      executeJsonpTransfer({ action: "lookup", barcode: itemCode }, function(response){
+        if (response && response.success && response.data) {
+          currentScannedPayload.product = response.data.name;
+          currentScannedPayload.category = response.data.category;
+        } else {
+          currentScannedPayload.product = "Item (" + itemCode + ")";
+          currentScannedPayload.category = "Master Missing";
+        }
+
+        if (parsed.weight !== null) {
+          commitPayloadEntryToStaging(currentScannedPayload.qty);
+        } else {
+          $("pop-product-name").innerText = currentScannedPayload.product;
+          $("pop-product-cat").innerText = currentScannedPayload.category;
+          $("pop-qty-input").value = "1";
+          $("dashboard-popup-backdrop").classList.add("open");
+          setTimeout(() => $("pop-qty-input").focus(), 100);
+        }
+      }, function(err){
+        if (parsed.weight !== null) {
+          commitPayloadEntryToStaging(currentScannedPayload.qty);
+        } else {
+          $("pop-product-name").innerText = currentScannedPayload.product;
+          $("pop-product-cat").innerText = "Offline";
+          $("dashboard-popup-backdrop").classList.add("open");
+        }
+      });
+    }
+
+    function commitPayloadEntryToStaging(quantityToLog) {
+      var itemObject = {
+        type: "DISPATCH",
+        barcode: currentScannedPayload.barcode,
+        category: currentScannedPayload.category,
+        product: currentScannedPayload.product,
+        qty: quantityToLog,
+        branch: selectedBranchName
+      };
+
+      centralBatchCollection.unshift(itemObject);
+      refreshHistoryLogDisplay();
+      setLogStatus("✅ Added: " + itemObject.product + " (" + itemObject.qty + " kg)", "success");
+    }
+
+    function closeDashboardPopupCard(actionType) {
+      if (actionType === 'cancel') {
+        $("dashboard-popup-backdrop").classList.remove("open");
+        return;
+      }
+
+      var userTypedQty = parseFloat($("pop-qty-input").value);
+      if (isNaN(userTypedQty) || userTypedQty <= 0) {
+        alert("Please enter a valid weight amount!");
+        return;
+      }
+
+      commitPayloadEntryToStaging(userTypedQty);
+      $("dashboard-popup-backdrop").classList.remove("open");
+    }
+
     function deleteRowEntryItem(index) {
       centralBatchCollection.splice(index, 1);
       refreshHistoryLogDisplay();
-      setLogStatus("Selected entry item removed.", "success");
+      setLogStatus("Entry removed.", "success");
     }
 
     function refreshHistoryLogDisplay() {
@@ -283,7 +419,7 @@
               <span style="color:var(--text-soft); font-size:11px;">Code: ${entry.barcode} | ${entry.category} | Branch: ${entry.branch}</span>
             </div>
             <div class="history-right">
-              <span style="font-weight:700; color:var(--text); font-size:14px; background:#F2E8DB; padding:4px 8px; border-radius:6px;">${entry.qty} kg</span>
+              <span style="font-weight:700; color:var(--terracotta); font-size:14px; background:#F5DFD6; padding:4px 8px; border-radius:6px;">${entry.qty} kg</span>
               <button class="history-delete-btn" type="button" onclick="deleteRowEntryItem(${i})">✕</button>
             </div>
           </div>`;
@@ -291,12 +427,8 @@
       scrollBox.innerHTML = htmlRowsGrid;
     }
 
+    /* CAMERA SCANNER FALLBACK */
     var scannerRunning = false;
-    var trackingSequence = [];
-    var mediaStreamInstance = null;
-    var nativeDetectorObject = null;
-    var nativeLoopActive = false;
-    var DETECT_READERS = ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "code_39_reader"];
 
     function triggerLiveScanner() {
       if (!selectedBranchName) {
@@ -304,44 +436,11 @@
         return;
       }
       if ($("scanner-modal").classList.contains("active")) return;
-      trackingSequence = [];
       $("scanner-modal").classList.add("active");
-
-      if ("BarcodeDetector" in window) startNativeCameraScanner(); else startQuaggaFallbackScanner();
-    }
-
-    async function startNativeCameraScanner() {
-      try { nativeDetectorObject = new BarcodeDetector({ formats: ["code_128", "code_39", "ean_13", "ean_8", "upc_a"] }); } catch(e){}
-      try {
-        mediaStreamInstance = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } } });
-      } catch (err) { startQuaggaFallbackScanner(); return; }
-
-      var liveVideo = document.createElement("video");
-      liveVideo.setAttribute("playsinline", ""); liveVideo.muted = true; liveVideo.srcObject = mediaStreamInstance;
-      $("scanner-viewport").innerHTML = ""; $("scanner-viewport").appendChild(liveVideo);
-      try { await liveVideo.play(); } catch(e){}
-
-      scannerRunning = true; nativeLoopActive = true;
-      nativeExtractionLoop(liveVideo);
-    }
-
-    async function nativeExtractionLoop(videoElement) {
-      while (nativeLoopActive) {
-        try {
-          var codesFound = await nativeDetectorObject.detect(videoElement);
-          if (codesFound && codesFound.length > 0 && codesFound[0].rawValue) {
-            evaluateIncomingScannedCode(codesFound[0].rawValue); return;
-          }
-        } catch (e) {}
-        await new Promise(r => setTimeout(r, 60));
-      }
-    }
-
-    function startQuaggaFallbackScanner() {
       Quagga.init({
         inputStream: { name: "Live", type: "LiveStream", target: document.querySelector("#scanner-viewport"), constraints: { facingMode: "environment", width: 1280, height: 720 } },
-        locator: { patchSize: "medium", halfSample: false, area: { top: "15%", right: "5%", left: "5%", bottom: "15%" } },
-        decoder: { readers: DETECT_READERS }
+        locator: { patchSize: "medium", halfSample: false },
+        decoder: { readers: ["code_128_reader", "ean_reader", "code_39_reader"] }
       }, function(err){ if(!err) { Quagga.start(); scannerRunning = true; } });
       Quagga.onDetected(onQuaggaFrameHit);
     }
@@ -349,116 +448,16 @@
     function onQuaggaFrameHit(resultData) {
       if (!scannerRunning) return;
       var rawStringCode = resultData.codeResult.code;
-      if (!rawStringCode || rawStringCode.length < 4) return;
-      
-      trackingSequence.push(rawStringCode);
-      if (trackingSequence.length > 2) trackingSequence.shift();
-      if (trackingSequence.length === 2 && trackingSequence[0] === trackingSequence[1]) evaluateIncomingScannedCode(rawStringCode);
+      if (rawStringCode) {
+        terminateLiveScanner();
+        evaluateIncomingScannedCode(rawStringCode);
+      }
     }
 
     function terminateLiveScanner() {
-      scannerRunning = false; nativeLoopActive = false;
-      if (mediaStreamInstance) { try { mediaStreamInstance.getTracks().forEach(t => t.stop()); } catch(e){} mediaStreamInstance = null; }
+      scannerRunning = false;
       try { Quagga.offDetected(onQuaggaFrameHit); Quagga.stop(); } catch(e){}
       $("scanner-modal").classList.remove("active");
-    }
-
-    function evaluateIncomingScannedCode(codeString) {
-      if (!selectedBranchName) return;
-      if (navigator.vibrate) navigator.vibrate(65);
-
-      var parsedBarcode = codeString;
-      var isolatedWeightVal = 0;
-      var isWeightScaleBarcode = false;
-
-      if (codeString.length > 4) {
-        parsedBarcode = codeString.substring(0, 4);
-        var subWeightStr = codeString.substring(4);
-        isolatedWeightVal = parseFloat(subWeightStr) || 0;
-        if (isolatedWeightVal > 0) isWeightScaleBarcode = true;
-      }
-
-      terminateLiveScanner();
-
-      currentScannedPayload = { 
-        barcode: parsedBarcode, 
-        qty: isolatedWeightVal, 
-        isWeight: isWeightScaleBarcode,
-        product: "Code: " + parsedBarcode,
-        category: "Loading Details..." 
-      };
-
-      if (!isWeightScaleBarcode) {
-        $("pop-product-name").innerText = currentScannedPayload.product;
-        $("pop-product-cat").innerText = currentScannedPayload.category;
-        $("pop-qty-input").value = "1";
-        $("dashboard-popup-backdrop").classList.add("open");
-        setTimeout(() => $("pop-qty-input").focus(), 100);
-      }
-
-      executeJsonpTransfer({ action: "lookup", barcode: parsedBarcode }, function(response){
-        if (response && response.success && response.data) {
-          currentScannedPayload.product = response.data.name;
-          currentScannedPayload.category = response.data.category;
-          
-          if (isWeightScaleBarcode) {
-            commitPayloadEntryToStaging(currentScannedPayload.qty);
-            setTimeout(function() { triggerLiveScanner(); }, 250);
-          } else {
-            $("pop-product-name").innerText = response.data.name;
-            $("pop-product-cat").innerText = response.data.category;
-          }
-        } else {
-          if (!isWeightScaleBarcode) {
-            $("pop-product-name").innerText = "New Item (" + parsedBarcode + ")";
-            $("pop-product-cat").innerText = "Not Found";
-          } else {
-            currentScannedPayload.product = "Unknown Weight Item (" + parsedBarcode + ")";
-            currentScannedPayload.category = "Master Missing";
-            commitPayloadEntryToStaging(currentScannedPayload.qty);
-            setTimeout(function() { triggerLiveScanner(); }, 250);
-          }
-        }
-      }, function(err){
-        setLogStatus("Lookup request timed out.", "error");
-      });
-    }
-
-    function closeDashboardPopupCard(actionType) {
-      if (actionType === 'cancel') {
-        $("dashboard-popup-backdrop").classList.remove("open");
-        return;
-      }
-
-      var userTypedQty = parseFloat($("pop-qty-input").value);
-      if (isNaN(userTypedQty) || userTypedQty <= 0) {
-        alert("Please enter a valid weight amount!");
-        return;
-      }
-
-      commitPayloadEntryToStaging(userTypedQty);
-      $("dashboard-popup-backdrop").classList.remove("open");
-
-      if (actionType === 'add_next') {
-        setTimeout(function() { triggerLiveScanner(); }, 200);
-      } else if (actionType === 'done') {
-        setLogStatus("Item added to dispatch batch.", "success");
-      }
-    }
-
-    function commitPayloadEntryToStaging(quantityToLog) {
-      var itemObject = {
-        type: "DISPATCH",
-        barcode: currentScannedPayload.barcode,
-        category: currentScannedPayload.category,
-        product: currentScannedPayload.product,
-        qty: quantityToLog,
-        branch: selectedBranchName
-      };
-
-      centralBatchCollection.push(itemObject);
-      refreshHistoryLogDisplay();
-      setLogStatus("Added: " + itemObject.product, "success");
     }
 
     function submitEntireDeskBatch() {
@@ -477,6 +476,7 @@
           alert("All dispatch entries pushed successfully!");
           centralBatchCollection = [];
           refreshHistoryLogDisplay();
+          setLogStatus("Batch submitted successfully!", "success");
         } else {
           setLogStatus("Error occurred during save processing.", "error");
         }
