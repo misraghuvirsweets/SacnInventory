@@ -38,10 +38,8 @@
     }
     .menu-btn.inward{ background:var(--green); }
     .menu-btn.outward{ background:var(--terracotta); }
-    .menu-btn.supervisor{ background:var(--navy); width:100%; padding:16px 10px; }
     .menu-btn:active{ transform: scale(0.97); opacity:0.95; }
     .menu-btn-title{ font-family:'Fraunces',serif; font-size:18px; font-weight:600; }
-    .menu-btn.supervisor .menu-btn-title{ font-size:15px; }
 
     /* DASHBOARD PANEL CONTAINER */
     .dashboard-panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.04); }
@@ -52,7 +50,7 @@
     .back-btn{ border:none; background:none; font-size:22px; cursor:pointer; color:inherit; padding:2px 8px; font-weight: bold; }
     .panel-body{ padding:16px; display:flex; flex-direction:column; gap:14px; }
 
-    /* BRANCH SELECTOR — DISPATCH ONLY */
+    /* BRANCH SELECTOR — DISPATCH ONLY (MIRAJ REMOVED) */
     #branch-select-section{ display:none; }
     .branch-btn-row{ display:flex; gap:8px; margin-top:6px; }
     .branch-select-btn{
@@ -68,12 +66,12 @@
 
     /* BIG TAP TO SCAN CONTROL BUTTON */
     .giant-scan-box {
-      width: 100%; padding: 28px 16px; text-align: center;
+      width: 100%; padding: 24px 16px; text-align: center;
       border: 2px dashed var(--border); border-radius: 12px; cursor: pointer;
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
       transition: all 0.2s; background: #fff;
     }
-    .giant-scan-box strong { font-size: 17px; letter-spacing: 0.02em; }
+    .giant-scan-box strong { font-size: 16px; letter-spacing: 0.02em; }
     .giant-scan-box span { font-size: 12px; opacity: 0.8; }
     .dashboard-panel.inward .giant-scan-box { color: var(--green); border-color: var(--green); background: var(--green-soft); }
     .dashboard-panel.outward .giant-scan-box { color: var(--terracotta); border-color: var(--terracotta); background: var(--terracotta-soft); }
@@ -94,7 +92,6 @@
     .history-left { display: flex; flex-direction: column; gap: 2px; }
     .history-right { display: flex; align-items: center; gap: 12px; }
     
-    /* ENTRY-WISE DELETE ACTION ICON BUTTON */
     .history-delete-btn {
       background: #F2E8DB; border: none; color: #9E2F11; font-size: 13px;
       font-weight: 700; cursor: pointer; width: 26px; height: 26px; border-radius: 50%;
@@ -102,7 +99,6 @@
     }
     .history-delete-btn:active { background: #E5D6C3; transform: scale(0.88); }
 
-    /* MAIN TRANSACTION MASTER BUTTONS */
     .master-submit-btn {
       width: 100%; padding: 15px; border: none; border-radius: 10px; 
       font-size: 15px; font-weight: 700; font-family: inherit; color: #fff; 
@@ -115,7 +111,7 @@
     .status-msg-bar.success{ color:var(--green); }
     .status-msg-bar.error{ color:var(--terracotta); }
 
-    /* SUPERVISOR: SEARCH + STOCK LIST */
+    /* SUPERVISOR VIEW STYLES */
     .supervisor-search-input{
       width:100%; padding:11px 14px; border:1px solid var(--border); border-radius:10px;
       font-size:14px; font-family:inherit; background:#fff; color:var(--text); outline:none;
@@ -129,7 +125,6 @@
     .stock-badge.low{ color:#9E2F11; background:#F5DFD6; }
     .chevron-icon{ color:var(--text-soft); font-size:14px; }
 
-    /* SUPERVISOR: ITEM HISTORY VIEW */
     #supervisor-history-view{ display:none; flex-direction:column; gap:12px; }
     .history-item-header{
       background:var(--navy-soft); border-radius:12px; padding:12px 14px;
@@ -151,7 +146,7 @@
     .txn-qty-change.prod{ color:var(--green); background:var(--green-soft); }
     .txn-qty-change.disp{ color:var(--terracotta); background:var(--terracotta-soft); }
 
-    /* CAMERA VIEWFINDER FRAME MODAL OVERLAY */
+    /* CAMERA VIEWFINDER MODAL */
     #scanner-modal{ position:fixed; inset:0; background:#000; z-index:9999; display:none; }
     #scanner-modal.active{ display:block; }
     #scanner-viewport{ position:absolute; inset:0; overflow:hidden; }
@@ -175,7 +170,7 @@
     }
     @keyframes laserline{ 0% { top:10%; } 50% { top:90%; } 100% { top:10%; } }
 
-    /* QUANTITY ENTRY FLUID DASHBOARD DIALOG POPUP */
+    /* QUANTITY ENTRY DIALOG POPUP */
     .dashboard-popup-backdrop {
       position: fixed; inset: 0; background: rgba(20, 16, 12, 0.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
       z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px;
@@ -231,19 +226,19 @@
       
       <div class="panel-body">
 
+        <!-- BRANCH SELECTOR (RAM MANDIR & VISHRAMBAGH ONLY) -->
         <div id="branch-select-section">
           <label class="history-section-label">Select Dispatch Branch</label>
           <div class="branch-btn-row">
             <button class="branch-select-btn" type="button" data-branch="Ram Mandir" onclick="selectBranch('Ram Mandir')">Ram Mandir</button>
             <button class="branch-select-btn" type="button" data-branch="Vishrambagh" onclick="selectBranch('Vishrambagh')">Vishrambagh</button>
-            <button class="branch-select-btn" type="button" data-branch="Miraj" onclick="selectBranch('Miraj')">Miraj</button>
           </div>
           <div id="branch-current-tag" class="branch-current-tag"></div>
         </div>
 
         <div id="scan-box-wrapper" class="giant-scan-box" onclick="triggerLiveScanner()">
-          <strong>⚡ TAP TO SCAN BARCODE</strong>
-          <span>Camera viewfinder opens automatically</span>
+          <strong>⚡ TAP TO SCAN OR USE BLUETOOTH SCANNER</strong>
+          <span>Camera or Bluetooth HID Barcode Scanner</span>
         </div>
 
         <div style="margin-top: 2px;">
@@ -257,7 +252,7 @@
       </div>
     </div>
 
-    <!-- ============== SUPERVISOR STOCK DASHBOARD ============== -->
+    <!-- SUPERVISOR DASHBOARD -->
     <div id="supervisor-dashboard" class="dashboard-panel supervisor" hidden>
       <div class="panel-head">
         <button class="back-btn" type="button" onclick="exitSupervisorDashboard()">←</button>
@@ -265,8 +260,6 @@
       </div>
 
       <div class="panel-body">
-
-        <!-- VIEW 1: STOCK LIST -->
         <div id="supervisor-stock-view">
           <input id="supervisor-search-input" class="supervisor-search-input" type="text"
                  placeholder="Search item name or code..." oninput="filterStockList(this.value)">
@@ -277,7 +270,6 @@
           <div id="supervisor-stock-list" class="history-scroll-box" style="max-height:340px;">Loading...</div>
         </div>
 
-        <!-- VIEW 2: ITEM HISTORY -->
         <div id="supervisor-history-view">
           <button class="back-btn" type="button" style="align-self:flex-start; padding-left:0;" onclick="backToStockList()">← Back to Stock List</button>
           <div id="history-item-header" class="history-item-header"></div>
@@ -305,7 +297,7 @@
       <div id="pop-product-cat" class="popup-item-category">Bakery</div>
       
       <div class="popup-input-container">
-        <label>Enter Quantity Count</label>
+        <label>Enter Weight / Quantity</label>
         <input id="pop-qty-input" class="popup-input-field" type="number" step="any" value="1">
       </div>
 
@@ -328,9 +320,28 @@
     var currentActiveMode = null; 
     var centralBatchCollection = []; 
     var currentScannedPayload = null; 
-    var selectedBranchName = null; // ONLY used for Dispatch (out) mode
+    var selectedBranchName = null;
 
-    /* ============== JSONP ENGINE FOR WEB APPLICATIONS ============== */
+    /* BLUETOOTH HID BARCODE SCANNER HANDLER */
+    var bluetoothBuffer = "";
+    var bluetoothTimer = null;
+
+    window.addEventListener("keydown", function(e) {
+      if ($("desk-dashboard").hidden) return;
+      if (document.activeElement && document.activeElement.tagName === "INPUT") return;
+
+      if (e.key === "Enter") {
+        if (bluetoothBuffer.trim().length > 0) {
+          evaluateIncomingScannedCode(bluetoothBuffer.trim());
+          bluetoothBuffer = "";
+        }
+      } else if (e.key.length === 1) {
+        bluetoothBuffer += e.key;
+        clearTimeout(bluetoothTimer);
+        bluetoothTimer = setTimeout(function() { bluetoothBuffer = ""; }, 200);
+      }
+    });
+
     var jsonpCounter = 0;
     function executeJsonpTransfer(params, successCallback, failureCallback) {
       jsonpCounter++;
@@ -350,7 +361,6 @@
       document.body.appendChild(scriptElement);
     }
 
-    /* ============== DASHBOARD NAVIGATION ENGINE ============== */
     function openDashboardScreen(mode) {
       currentActiveMode = mode;
       centralBatchCollection = [];
@@ -360,7 +370,6 @@
       $("desk-dashboard").className = "dashboard-panel " + (mode === "in" ? "inward" : "outward");
       $("dashboard-title-label").innerText = mode === "in" ? "Production Dashboard Unit" : "Dispatch Dashboard Unit";
 
-      // BRANCH SELECTOR VISIBLE ONLY FOR DISPATCH (OUT) MODE
       if (mode === "out") {
         $("branch-select-section").style.display = "block";
         updateBranchButtonStates();
@@ -382,7 +391,6 @@
       $("menu-screen").hidden = false;
     }
 
-    /* ============== BRANCH SELECTOR CONTROLLER (DISPATCH ONLY) ============== */
     function selectBranch(branchName) {
       selectedBranchName = branchName;
       updateBranchButtonStates();
@@ -412,7 +420,6 @@
       }
     }
 
-    /* ============== HISTORY GRID CONTROLLER WITH INDIVIDUAL DELETE ============== */
     function deleteRowEntryItem(index) {
       centralBatchCollection.splice(index, 1);
       refreshHistoryLogDisplay();
@@ -437,7 +444,7 @@
               <span style="color:var(--text-soft); font-size:11px;">Code: ${entry.barcode} | ${entry.category}${branchLine}</span>
             </div>
             <div class="history-right">
-              <span style="font-weight:700; color:var(--text); font-size:14px; background:#F2E8DB; padding:4px 8px; border-radius:6px;">x${entry.qty}</span>
+              <span style="font-weight:700; color:var(--text); font-size:14px; background:#F2E8DB; padding:4px 8px; border-radius:6px;">${entry.qty} kg</span>
               <button class="history-delete-btn" type="button" onclick="deleteRowEntryItem(${i})">✕</button>
             </div>
           </div>`;
@@ -445,7 +452,6 @@
       scrollBox.innerHTML = htmlRowsGrid;
     }
 
-    /* ============== BARCODE CAM CONTROL MATRICES (HIGH-SPEED) ============== */
     var scannerRunning = false;
     var trackingSequence = [];
     var mediaStreamInstance = null;
@@ -454,9 +460,8 @@
     var DETECT_READERS = ["code_128_reader", "ean_reader", "ean_8_reader", "upc_reader", "code_39_reader"];
 
     function triggerLiveScanner() {
-      // GUARD: DISPATCH MODE REQUIRES A BRANCH TO BE SELECTED FIRST
       if (currentActiveMode === "out" && !selectedBranchName) {
-        alert("Please select a Branch (Ram Mandir / Vishrambagh / Miraj) before scanning.");
+        alert("Please select a Branch (Ram Mandir / Vishrambagh) before scanning.");
         return;
       }
       if ($("scanner-modal").classList.contains("active")) return;
@@ -519,10 +524,7 @@
       $("scanner-modal").classList.remove("active");
     }
 
-    /* ============== HIGH-SPEED BARCODE INTERPRETATION MATRIX ============== */
     function evaluateIncomingScannedCode(codeString) {
-      if (!scannerRunning) return;
-      scannerRunning = false;
       if (navigator.vibrate) navigator.vibrate(65);
 
       var parsedBarcode = codeString;
@@ -538,16 +540,14 @@
 
       terminateLiveScanner();
 
-      // INITIALIZE PAYLOAD PACK OBJECT WITH DEFAULT PRE-EMPTIVE DATA
       currentScannedPayload = { 
         barcode: parsedBarcode, 
         qty: isolatedWeightVal, 
         isWeight: isWeightScaleBarcode,
-        product: "Code: " + parsedBarcode, // Faster Placeholder
+        product: "Code: " + parsedBarcode,
         category: "Loading Details..." 
       };
 
-      // **SPEED OPTIMIZATION**: OPEN POPUP INSTANTLY FOR NORMAL BARCODES WITHOUT WAITING FOR SHEET LOOKUP
       if (!isWeightScaleBarcode) {
         $("pop-product-name").innerText = currentScannedPayload.product;
         $("pop-product-cat").innerText = currentScannedPayload.category;
@@ -556,18 +556,15 @@
         setTimeout(() => $("pop-qty-input").focus(), 100);
       }
 
-      // ASYNC SHEET LOOKUP RUNNING IN BACKGROUND TO UPDATE DETAILS FLUIDLY
       executeJsonpTransfer({ action: "lookup", barcode: parsedBarcode }, function(response){
         if (response && response.success && response.data) {
           currentScannedPayload.product = response.data.name;
           currentScannedPayload.category = response.data.category;
           
           if (isWeightScaleBarcode) {
-            // WEIGHT BARCODE WORKFLOW - AUTO COMMIT IMMEDIATELY
             commitPayloadEntryToStaging(currentScannedPayload.qty);
             setTimeout(function() { triggerLiveScanner(); }, 250);
           } else {
-            // ACTIVE POP-UP CURRENTLY OPEN UPDATES LABELS IN REAL-TIME FLUIDLY
             $("pop-product-name").innerText = response.data.name;
             $("pop-product-cat").innerText = response.data.category;
           }
@@ -583,11 +580,10 @@
           }
         }
       }, function(err){
-        setLogStatus("Core lookup backend pipeline delay.", "error");
+        setLogStatus("Lookup request timed out.", "error");
       });
     }
 
-    /* ============== POPUP CARD ENGINE (MANAGE CLOSE STATES) ============== */
     function closeDashboardPopupCard(actionType) {
       if (actionType === 'cancel') {
         $("dashboard-popup-backdrop").classList.remove("open");
@@ -596,21 +592,17 @@
 
       var userTypedQty = parseFloat($("pop-qty-input").value);
       if (isNaN(userTypedQty) || userTypedQty <= 0) {
-        alert("Please enter a valid quantity amount!");
+        alert("Please enter a valid weight amount!");
         return;
       }
 
-      // COMMIT BALANCES TO SCREEN
       commitPayloadEntryToStaging(userTypedQty);
       $("dashboard-popup-backdrop").classList.remove("open");
 
-      // CONDITIONAL DIRECTION ARCHITECTURE
       if (actionType === 'add_next') {
-        // RE-LAUNCH SCANNER LOOP IMMEDIATELY AT HIGH VELOCITY
         setTimeout(function() { triggerLiveScanner(); }, 200);
       } else if (actionType === 'done') {
-        // STOP & REMAIN ON HISTORY LOG SCREEN WITHOUT OPENING SCANNER
-        setLogStatus("Item added. Batch staging screen active.", "success");
+        setLogStatus("Item added to log staging.", "success");
       }
     }
 
@@ -621,36 +613,33 @@
         category: currentScannedPayload.category,
         product: currentScannedPayload.product,
         qty: quantityToLog,
-        // BRANCH ONLY APPLIES TO DISPATCH ENTRIES; PRODUCTION STAYS BLANK
         branch: (currentActiveMode === "out") ? selectedBranchName : ""
       };
 
       centralBatchCollection.push(itemObject);
       refreshHistoryLogDisplay();
-      setLogStatus("Added into Workspace: " + itemObject.product, "success");
+      setLogStatus("Added: " + itemObject.product, "success");
     }
 
-    /* ============== FINAL TRANSMISSION DISPATCH DATA ============== */
     function submitEntireDeskBatch() {
       if (centralBatchCollection.length === 0) {
-        setLogStatus("Staging batch history environment ledger is empty.", "error");
+        setLogStatus("Workspace history log is empty.", "error");
         return;
       }
 
-      if (!confirm("Are you sure you want to push this total transaction batch array containing " + centralBatchCollection.length + " logged line items?\n\nStock will be auto " +
-        (currentActiveMode === "in" ? "increased (+)" : "reduced (-)") + " for each item.")) return;
+      if (!confirm("Confirm submission of " + centralBatchCollection.length + " logged line items?")) return;
 
-      setLogStatus("Uploading records payload package to Cloud Sheets server...", "");
+      setLogStatus("Uploading records to Cloud Sheet...", "");
       var serializedBatch = JSON.stringify(centralBatchCollection);
 
       executeJsonpTransfer({ action: "saveBatch", batch: serializedBatch }, function(res){
         if (res && res.success) {
-          alert("All entries pushed successfully! Stock updated (" + (currentActiveMode === "in" ? "+" : "-") + " applied).");
+          alert("All entries pushed successfully!");
           centralBatchCollection = [];
           refreshHistoryLogDisplay();
           exitDashboardScreen();
         } else {
-          setLogStatus("Database server execution process breakdown occurred.", "error");
+          setLogStatus("Error occurred during save processing.", "error");
         }
       }, function(e){ setLogStatus("Cloud submission pipeline connection timeout.", "error"); });
     }
@@ -662,15 +651,12 @@
       bar.className = "status-msg-bar " + classification;
     }
 
-    /* ============================================================
-       ============== SUPERVISOR STOCK DASHBOARD ==================
-       ============================================================ */
     var supervisorStockCache = [];
 
     function openSupervisorDashboard() {
       $("menu-screen").hidden = true;
       $("supervisor-dashboard").hidden = false;
-      backToStockList(); // ensure list view shown first
+      backToStockList();
       loadStockList();
     }
 
@@ -690,17 +676,17 @@
 
     function loadStockList() {
       $("supervisor-stock-list").innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">Loading stock list...</div>';
-      setSupervisorStatus("Fetching live stock from Cloud Sheet...", "");
+      setSupervisorStatus("Fetching stock from sheet...", "");
 
       executeJsonpTransfer({ action: "getStockList" }, function(res){
         if (res && res.success) {
           supervisorStockCache = res.data || [];
           renderStockList(supervisorStockCache);
-          setSupervisorStatus("Stock list updated. " + supervisorStockCache.length + " items loaded.", "success");
+          setSupervisorStatus("Loaded " + supervisorStockCache.length + " items.", "success");
         } else {
           setSupervisorStatus("Failed to load stock list.", "error");
         }
-      }, function(e){ setSupervisorStatus("Stock list connection timeout.", "error"); });
+      }, function(e){ setSupervisorStatus("Connection timeout.", "error"); });
     }
 
     function filterStockList(query) {
@@ -769,7 +755,7 @@
     function renderItemHistory(historyList) {
       var box = $("supervisor-history-list");
       if (!historyList || historyList.length === 0) {
-        box.innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">No transactions recorded yet for this item.</div>';
+        box.innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">No transactions recorded yet.</div>';
         return;
       }
       var html = "";
@@ -794,15 +780,6 @@
       $("supervisor-stock-view").style.display = "block";
     }
 
-    /* ============================================================
-       DIRECT-LINK SUPPORT (GitHub Pages):
-       Open this page as
-       https://misraghuvirsweets.github.io/SacnInventory/?view=supervisor
-       to jump straight into the Supervisor Dashboard.
-       The normal link (no query param) only ever shows
-       Production / Dispatch — the Supervisor option is not on
-       the main menu at all.
-       ============================================================ */
     var urlParamsForView = new URLSearchParams(window.location.search);
     var INITIAL_VIEW = urlParamsForView.get('view');
     window.addEventListener('DOMContentLoaded', function () {
