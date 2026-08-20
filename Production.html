@@ -385,7 +385,8 @@
     }
 
     function parseCustomBarcode(rawCode) {
-      var cleanCode = String(rawCode).trim().replace(/^#+/, '');
+      // Strips leading $, #, pound (£,₤), and whitespace symbols
+      var cleanCode = String(rawCode).trim().replace(/^[$#£₤\s]+/g, '');
       if (cleanCode.length <= 4) return { itemCode: cleanCode, weight: null };
 
       var itemCode = cleanCode.substring(0, 4);
