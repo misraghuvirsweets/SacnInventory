@@ -15,119 +15,106 @@
       --border:#DFD2BF;
       --green:#3D5E26;
       --green-soft:#DFE8D5;
+      --terracotta:#A63C19;
       --radius:16px;
     }
     *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     html,body{ margin:0; background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; }
-    .wrap{ max-width:480px; margin:0 auto; padding:18px 14px 40px; }
+    .wrap{ max-width:1050px; margin:0 auto; padding:20px 16px 40px; }
 
-    header{ text-align:center; margin-bottom:14px; }
-    header h1{ font-family:'Fraunces',serif; font-size:24px; font-weight:600; margin:0; color:var(--text); }
+    header{ text-align:center; margin-bottom:18px; }
+    header h1{ font-family:'Fraunces',serif; font-size:26px; font-weight:600; margin:0; color:var(--text); }
     header p{ margin:3px 0 0; font-size:13px; color:var(--text-soft); font-weight: 500; }
 
-    .dashboard-panel{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.04); }
-    .panel-head{ display:flex; align-items:center; justify-content:center; padding:14px 16px; font-family:'Fraunces',serif; font-size:18px; font-weight:600; border-bottom:1px solid var(--border); background:var(--green-soft); color:var(--green); }
-    .panel-body{ padding:16px; display:flex; flex-direction:column; gap:14px; }
+    .dashboard-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 18px; }
+    @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } }
 
-    /* PROMINENT ANIMATED 3-SECOND COUNTDOWN BADGE ABOVE SCANNER */
+    .panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.04); display:flex; flex-direction:column; }
+    .panel-head { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; font-family:'Fraunces',serif; font-size:18px; font-weight:600; border-bottom:1px solid var(--border); background:var(--green-soft); color:var(--green); }
+    .panel-body { padding:18px; display:flex; flex-direction:column; gap:14px; flex:1; }
+
+    /* 3-MINUTE INACTIVITY PROGRESS BAR */
+    .inactivity-bar-container { background: #EFE9DE; border-radius: 8px; height: 8px; overflow: hidden; width: 100%; margin-top: 2px; }
+    .inactivity-bar-fill { background: var(--green); height: 100%; width: 100%; transition: width 1s linear; }
+
+    /* 3-SECOND BLUETOOTH COUNTDOWN BADGE */
     .timer-badge-display {
       display: none; align-items: center; justify-content: center; gap: 8px;
       background: var(--green); color: #fff; padding: 14px 16px; border-radius: 12px;
-      font-size: 17px; font-weight: 700; text-align: center;
-      box-shadow: 0 6px 16px rgba(61,94,38,0.35); animation: pulseTimer 0.5s infinite alternate;
-      border: 2px solid #273e18; margin-bottom: 2px;
+      font-size: 16px; font-weight: 700; text-align: center;
+      box-shadow: 0 6px 16px rgba(61,94,38,0.3); animation: pulseTimer 0.5s infinite alternate;
+      border: 2px solid #273e18;
     }
     .timer-badge-display.active { display: flex !important; }
     @keyframes pulseTimer { from { transform: scale(0.98); } to { transform: scale(1.02); } }
 
     .giant-scan-box {
-      width: 100%; padding: 24px 16px; text-align: center;
+      width: 100%; padding: 26px 16px; text-align: center;
       border: 2px dashed var(--green); border-radius: 12px; cursor: pointer;
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
       transition: all 0.2s; background: var(--green-soft); color: var(--green);
     }
     .giant-scan-box strong { font-size: 16px; letter-spacing: 0.02em; }
-    .giant-scan-box span { font-size: 12px; opacity: 0.8; }
-    .giant-scan-box:active { transform: scale(0.96); }
+    .giant-scan-box span { font-size: 12px; opacity: 0.85; }
+    .giant-scan-box:active { transform: scale(0.97); }
 
-    .history-section-label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-soft); font-weight:700; margin-top: 4px; }
+    /* LATEST SCANNED PREVIEW DISPLAY */
+    .last-scanned-card {
+      background: #FAF7F2; border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+      display: flex; flex-direction: column; gap: 4px; border-left: 5px solid var(--green);
+    }
+    .last-scanned-card label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-soft); }
+    .last-scanned-title { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: var(--text); margin: 0; }
+    .last-scanned-meta { font-size: 13px; font-weight: 600; color: var(--green); display: flex; justify-content: space-between; margin-top: 4px; }
+
+    /* HISTORY LIST */
     .history-scroll-box {
       border: 1px solid var(--border); border-radius: 12px; background: #FAF7F2; 
-      max-height: 280px; overflow-y: auto; padding: 2px 12px;
+      min-height: 280px; max-height: 400px; overflow-y: auto; padding: 4px 14px; flex: 1;
     }
     .history-row {
       display: flex; justify-content: space-between; align-items: center;
-      font-size: 13.5px; padding: 11px 0; border-bottom: 1px dashed var(--border);
+      font-size: 13.5px; padding: 12px 0; border-bottom: 1px dashed var(--border);
     }
     .history-row:last-child { border-bottom: none; }
     .history-left { display: flex; flex-direction: column; gap: 2px; }
-    .history-right { display: flex; align-items: center; gap: 12px; }
-    
+    .history-right { display: flex; align-items: center; gap: 10px; }
+
     .history-delete-btn {
       background: #F2E8DB; border: none; color: #9E2F11; font-size: 13px;
       font-weight: 700; cursor: pointer; width: 26px; height: 26px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center; transition: all 0.15s;
     }
-    .history-delete-btn:active { background: #E5D6C3; transform: scale(0.88); }
+    .history-delete-btn:active { transform: scale(0.88); }
 
     .master-submit-btn {
       width: 100%; padding: 15px; border: none; border-radius: 10px; 
       font-size: 15px; font-weight: 700; font-family: inherit; color: #fff; 
       cursor: pointer; background: var(--green); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .master-submit-btn:active { opacity: 0.92; transform: translateY(1px); }
-    
-    .status-msg-bar{ min-height:18px; font-size:13px; font-weight: 600; text-align: center; }
-    .status-msg-bar.success{ color:var(--green); }
-    .status-msg-bar.error{ color:#A63C19; }
+    .status-msg-bar { min-height: 18px; font-size: 13px; font-weight: 600; text-align: center; }
+    .status-msg-bar.success { color: var(--green); }
+    .status-msg-bar.error { color: var(--terracotta); }
 
-    /* CAMERA OVERLAY & ON-SCREEN TIMER */
-    #scanner-modal{ position:fixed; inset:0; background:#000; z-index:9999; display:none; }
-    #scanner-modal.active{ display:block; }
-    #scanner-viewport{ position:absolute; inset:0; overflow:hidden; }
-    #scanner-viewport video, #scanner-viewport canvas{
-      position:absolute; inset:0; width:100% !important; height:100% !important; object-fit:cover;
-    }
-    .scanner-topbar{
-      position:absolute; top:0; left:0; right:0; z-index:3; display:flex; align-items:center; justify-content:space-between;
-      padding:16px; background:linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);
-    }
-    .scanner-cancel-action{
-      background:rgba(255,255,255,0.25); color:#fff; border:none; border-radius:8px; padding:8px 14px; font-weight:600; font-size:13px; cursor:pointer;
-    }
-    .scanner-guide-box{
-      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:82%; max-width:350px; height:130px;
-      border:3px solid #528A33; border-radius:14px; box-shadow:0 0 0 2000px rgba(0,0,0,0.55); z-index:2; pointer-events:none;
-    }
+    /* CAMERA SCANNER MODAL */
+    #scanner-modal { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; }
+    #scanner-modal.active { display: block; }
+    #scanner-viewport { position: absolute; inset: 0; overflow: hidden; }
+    #scanner-viewport video, #scanner-viewport canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; object-fit: cover; }
+    .scanner-topbar { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; padding: 16px; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); }
+    .scanner-cancel-action { background: rgba(255,255,255,0.25); color: #fff; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 600; font-size: 13px; cursor: pointer; }
+    .scanner-guide-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 82%; max-width: 350px; height: 130px; border: 3px solid var(--green); border-radius: 14px; box-shadow: 0 0 0 2000px rgba(0,0,0,0.55); z-index: 2; pointer-events: none; }
 
-    .camera-timer-overlay {
-      position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
-      z-index: 10; background: rgba(0, 0, 0, 0.85); color: #fff;
-      padding: 12px 24px; border-radius: 30px; border: 2px solid var(--green);
-      font-size: 16px; font-weight: 700; text-align: center; display: none;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.5); backdrop-filter: blur(4px);
-    }
-    .camera-timer-overlay.active { display: block; animation: pulseTimer 0.5s infinite alternate; }
-
-    .dashboard-popup-backdrop {
-      position: fixed; inset: 0; background: rgba(20, 16, 12, 0.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px;
-      opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
-    }
+    /* POPUP FORM */
+    .dashboard-popup-backdrop { position: fixed; inset: 0; background: rgba(20, 16, 12, 0.45); backdrop-filter: blur(8px); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
     .dashboard-popup-backdrop.open { opacity: 1; pointer-events: auto; }
-    .dashboard-popup-card {
-      background: #FFFFFF; border: 1px solid var(--border); width: 100%; max-width: 360px;
-      border-radius: 20px; padding: 22px; box-shadow: 0 20px 45px rgba(0,0,0,0.2);
-      transform: scale(0.92); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.15);
-    }
+    .dashboard-popup-card { background: #fff; border: 1px solid var(--border); width: 100%; max-width: 360px; border-radius: 20px; padding: 22px; box-shadow: 0 20px 45px rgba(0,0,0,0.2); transform: scale(0.92); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.15); }
     .dashboard-popup-backdrop.open .dashboard-popup-card { transform: scale(1); }
     .popup-item-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; color: var(--text); margin: 0 0 4px 0; text-align: center; }
     .popup-item-category { font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-soft); text-align: center; font-weight: 700; margin-bottom: 18px; }
-    
     .popup-input-container { background: #FCFAF6; border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 16px; }
     .popup-input-container label { display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-soft); text-align: center; margin-bottom: 4px; }
     .popup-input-field { width: 100%; padding: 4px; font-size: 26px; font-weight: 700; border: none; background: transparent; text-align: center; color: var(--text); outline: none; font-family: inherit; }
-    
     .popup-action-column { display: flex; flex-direction: column; gap: 10px; }
     .popup-action-btn { padding: 13px; border: none; border-radius: 10px; font-size: 14.5px; font-weight: 700; cursor: pointer; font-family: inherit; text-align: center; }
     .popup-action-btn.cancel { background: #EFE9DE; color: var(--text); }
@@ -141,48 +128,67 @@
       <p>Production Entry Dashboard</p>
     </header>
 
-    <div class="dashboard-panel">
-      <div class="panel-head">
-        <span>🏭 Production Entry Desk</span>
+    <div class="dashboard-grid">
+      <!-- LEFT SCANNING & PREVIEW PANEL -->
+      <div class="panel">
+        <div class="panel-head">
+          <span>🏭 Production Scanner</span>
+          <span id="session-idle-label" style="font-size:12px; font-family:'Inter',sans-serif; opacity:0.85;">Inactivity: 3m 00s</span>
+        </div>
+        <div class="panel-body">
+          <div class="inactivity-bar-container">
+            <div id="inactivity-progress" class="inactivity-bar-fill"></div>
+          </div>
+
+          <!-- PROMINENT BLUETOOTH COUNTDOWN BADGE -->
+          <div id="scan-timer-badge" class="timer-badge-display">
+            <span>⏱ Scan Lockout Active:</span>
+            <span id="scan-timer-count">3</span>s
+          </div>
+
+          <div id="scan-box-wrapper" class="giant-scan-box" onclick="triggerLiveScanner()">
+            <strong>⚡ BLUETOOTH / CAMERA SCANNER</strong>
+            <span>Scan Barcode Directly or Tap for Camera</span>
+          </div>
+
+          <!-- SIDE PREVIEW OF LATEST SCANNED ITEM -->
+          <div class="last-scanned-card">
+            <label>Scanned Item Preview</label>
+            <h3 id="preview-item-name" class="last-scanned-title">---</h3>
+            <div class="last-scanned-meta">
+              <span id="preview-item-code">Code: ---</span>
+              <span id="preview-item-weight">Weight: --- kg</span>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div class="panel-body">
-        <!-- ON-SCREEN BLUETOOTH COUNTDOWN BADGE -->
-        <div id="scan-timer-badge" class="timer-badge-display">
-          <span>⏱ Next Scan Ready In:</span>
-          <span id="scan-timer-count">3</span>s
-        </div>
 
-        <div id="scan-box-wrapper" class="giant-scan-box" onclick="triggerLiveScanner()">
-          <strong>⚡ BLUETOOTH / CAMERA SCANNER</strong>
-          <span>Scan Barcode Directly or Tap for Camera</span>
+      <!-- RIGHT SIDE HISTORY LOG -->
+      <div class="panel">
+        <div class="panel-head">
+          <span>📋 Batch Workspace History</span>
+          <span id="entry-count-tag" style="font-size:13px;">0 Items</span>
         </div>
-
-        <div style="margin-top: 2px;">
-          <label class="history-section-label">Logged Production Batch History</label>
+        <div class="panel-body">
           <div id="dashboard-history-scroll" class="history-scroll-box">No entries logged in current batch workspace yet.</div>
+          <button class="master-submit-btn" type="button" onclick="submitEntireDeskBatch()">🚀 Save Production Entries</button>
+          <div id="dashboard-status-log" class="status-msg-bar"></div>
         </div>
-
-        <button class="master-submit-btn" type="button" onclick="submitEntireDeskBatch()">🚀 Save Production Entries</button>
-        <div id="dashboard-status-log" class="status-msg-bar"></div>
       </div>
     </div>
   </div>
 
+  <!-- CAMERA SCANNER MODAL -->
   <div id="scanner-modal">
     <div id="scanner-viewport"></div>
     <div class="scanner-topbar">
       <span style="color:#fff; font-size:15px; font-weight:600;">Scanning Production Barcode...</span>
       <button class="scanner-cancel-action" type="button" onclick="terminateLiveScanner()">✕ Close</button>
     </div>
-    
-    <div id="camera-timer-overlay" class="camera-timer-overlay">
-      Next Scan In: <span id="camera-timer-count">3</span>s
-    </div>
-
     <div class="scanner-guide-box"></div>
   </div>
 
+  <!-- MANUAL WEIGHT ENTRY POPUP -->
   <div id="dashboard-popup-backdrop" class="dashboard-popup-backdrop">
     <div class="dashboard-popup-card">
       <h3 id="pop-product-name" class="popup-item-title">Product Description</h3>
@@ -209,16 +215,56 @@
     var centralBatchCollection = []; 
     var currentScannedPayload = null; 
     var scanCountdownInterval = null;
-    var cameraTimerInterval = null;
     var isScanOnCooldown = false;
 
-    /* BLUETOOTH SCANNER KEYBOARD LISTENER */
+    /* 3-MINUTE (180s) INACTIVITY SAFETY TIMER */
+    var INACTIVITY_LIMIT_SECONDS = 180;
+    var secondsInactivityRemaining = INACTIVITY_LIMIT_SECONDS;
+    var inactivityInterval = null;
+
+    function resetInactivityTimer() {
+      secondsInactivityRemaining = INACTIVITY_LIMIT_SECONDS;
+      updateInactivityUI();
+    }
+
+    function startInactivityTracker() {
+      if (inactivityInterval) clearInterval(inactivityInterval);
+      inactivityInterval = setInterval(function() {
+        secondsInactivityRemaining--;
+        if (secondsInactivityRemaining <= 0) {
+          handleInactivityTimeout();
+        } else {
+          updateInactivityUI();
+        }
+      }, 1000);
+    }
+
+    function updateInactivityUI() {
+      var mins = Math.floor(secondsInactivityRemaining / 60);
+      var secs = secondsInactivityRemaining % 60;
+      var formattedSecs = secs < 10 ? "0" + secs : secs;
+      $("session-idle-label").innerText = "Inactivity: " + mins + "m " + formattedSecs + "s";
+
+      var pct = (secondsInactivityRemaining / INACTIVITY_LIMIT_SECONDS) * 100;
+      $("inactivity-progress").style.width = pct + "%";
+    }
+
+    function handleInactivityTimeout() {
+      if (centralBatchCollection.length > 0) {
+        setLogStatus("⚠️ Idle 3 mins reached. Please save workspace.", "error");
+      }
+      resetInactivityTimer();
+    }
+
+    /* HARDWARE BLUETOOTH SCANNER INTERCEPTOR & LOCKOUT */
     var bluetoothBuffer = "";
     var bluetoothTimer = null;
 
     window.addEventListener("keydown", function(e) {
+      resetInactivityTimer();
       if (document.activeElement && document.activeElement.tagName === "INPUT") return;
-      
+
+      // ABSOLUTE LOCKOUT: Discard all keystrokes while 3-second cooldown is running
       if (isScanOnCooldown) {
         bluetoothBuffer = "";
         return;
@@ -228,7 +274,6 @@
         if (bluetoothBuffer.trim().length > 0) {
           var scannedText = bluetoothBuffer.trim();
           bluetoothBuffer = "";
-          // FORCE timer display FIRST before triggering network call
           start3SecondScanTimer();
           setTimeout(function() {
             evaluateIncomingScannedCode(scannedText);
@@ -253,7 +298,7 @@
       badge.style.display = "flex";
       badge.classList.add("active");
 
-      // Force synchronous DOM reflow to make countdown visible immediately
+      // Synchronous DOM reflow force to render timer immediately
       void badge.offsetHeight;
 
       scanCountdownInterval = setInterval(function() {
@@ -290,10 +335,7 @@
 
     function parseCustomBarcode(rawCode) {
       var cleanCode = String(rawCode).trim().replace(/^#+/, '');
-      
-      if (cleanCode.length <= 4) {
-        return { itemCode: cleanCode, weight: null };
-      }
+      if (cleanCode.length <= 4) return { itemCode: cleanCode, weight: null };
 
       var itemCode = cleanCode.substring(0, 4);
       var weightStr = cleanCode.substring(4);
@@ -308,10 +350,7 @@
         weightVal = parseFloat(weightStr);
       }
 
-      return {
-        itemCode: itemCode,
-        weight: isNaN(weightVal) ? null : weightVal
-      };
+      return { itemCode: itemCode, weight: isNaN(weightVal) ? null : weightVal };
     }
 
     function evaluateIncomingScannedCode(rawCodeString) {
@@ -324,7 +363,6 @@
       currentScannedPayload = {
         barcode: itemCode,
         qty: extractedWeight !== null ? extractedWeight : 1,
-        isWeightBarcode: extractedWeight !== null,
         product: "Code: " + itemCode,
         category: "Loading..."
       };
@@ -343,9 +381,7 @@
         if (parsed.weight !== null) {
           commitPayloadEntryToStaging(currentScannedPayload.qty);
         } else {
-          if ($("scanner-modal").classList.contains("active")) {
-            terminateLiveScanner();
-          }
+          if ($("scanner-modal").classList.contains("active")) terminateLiveScanner();
           $("pop-product-name").innerText = currentScannedPayload.product;
           $("pop-product-cat").innerText = currentScannedPayload.category;
           $("pop-qty-input").value = "1";
@@ -356,9 +392,7 @@
         if (parsed.weight !== null) {
           commitPayloadEntryToStaging(currentScannedPayload.qty);
         } else {
-          if ($("scanner-modal").classList.contains("active")) {
-            terminateLiveScanner();
-          }
+          if ($("scanner-modal").classList.contains("active")) terminateLiveScanner();
           $("pop-product-name").innerText = currentScannedPayload.product;
           $("pop-product-cat").innerText = "Offline";
           $("dashboard-popup-backdrop").classList.add("open");
@@ -377,6 +411,12 @@
       };
 
       centralBatchCollection.unshift(itemObject);
+      
+      // UPDATE PREVIEW CARD AT SIDE
+      $("preview-item-name").innerText = itemObject.product;
+      $("preview-item-code").innerText = "Code: " + itemObject.barcode;
+      $("preview-item-weight").innerText = "Weight: " + itemObject.qty + " kg";
+
       refreshHistoryLogDisplay();
       setLogStatus("✅ Added: " + itemObject.product + " (" + itemObject.qty + " kg)", "success");
     }
@@ -404,9 +444,10 @@
     }
 
     function refreshHistoryLogDisplay() {
+      $("entry-count-tag").innerText = centralBatchCollection.length + " Items";
       var scrollBox = $("dashboard-history-scroll");
       if (centralBatchCollection.length === 0) {
-        scrollBox.innerHTML = '<div style="text-align:center; color:#888; padding:15px; font-size:13px;">No entries logged in current batch workspace yet.</div>';
+        scrollBox.innerHTML = '<div style="text-align:center; color:#888; padding:20px; font-size:13px;">No entries logged in current batch workspace yet.</div>';
         return;
       }
 
@@ -420,7 +461,7 @@
               <span style="color:var(--text-soft); font-size:11px;">Code: ${entry.barcode} | ${entry.category}</span>
             </div>
             <div class="history-right">
-              <span style="font-weight:700; color:var(--text); font-size:14px; background:#DFE8D5; color:var(--green); padding:4px 8px; border-radius:6px;">${entry.qty} kg</span>
+              <span style="font-weight:700; color:var(--green); font-size:14px; background:#DFE8D5; padding:4px 8px; border-radius:6px;">${entry.qty} kg</span>
               <button class="history-delete-btn" type="button" onclick="deleteRowEntryItem(${i})">✕</button>
             </div>
           </div>`;
@@ -430,7 +471,6 @@
 
     /* CAMERA SCANNER HANDLER */
     var scannerRunning = false;
-
     function triggerLiveScanner() {
       if ($("scanner-modal").classList.contains("active")) return;
       isScanOnCooldown = false;
@@ -446,45 +486,16 @@
 
     function onQuaggaFrameHit(resultData) {
       if (!scannerRunning || isScanOnCooldown) return;
-      
       var rawStringCode = resultData.codeResult.code;
       if (rawStringCode) {
         start3SecondScanTimer();
         evaluateIncomingScannedCode(rawStringCode);
-        
-        var parsed = parseCustomBarcode(rawStringCode);
-        if (parsed.weight !== null) {
-          startOnCamera3SecondTimer();
-        }
       }
-    }
-
-    function startOnCamera3SecondTimer() {
-      var timerOverlay = $("camera-timer-overlay");
-      var timerCount = $("camera-timer-count");
-      var timeLeft = 3;
-
-      timerCount.innerText = timeLeft;
-      timerOverlay.classList.add("active");
-
-      if (cameraTimerInterval) clearInterval(cameraTimerInterval);
-
-      cameraTimerInterval = setInterval(function() {
-        timeLeft--;
-        if (timeLeft <= 0) {
-          clearInterval(cameraTimerInterval);
-          timerOverlay.classList.remove("active");
-        } else {
-          timerCount.innerText = timeLeft;
-        }
-      }, 1000);
     }
 
     function terminateLiveScanner() {
       scannerRunning = false;
       isScanOnCooldown = false;
-      if (cameraTimerInterval) clearInterval(cameraTimerInterval);
-      $("camera-timer-overlay").classList.remove("active");
       try { Quagga.offDetected(onQuaggaFrameHit); Quagga.stop(); } catch(e){}
       $("scanner-modal").classList.remove("active");
     }
@@ -518,6 +529,8 @@
       bar.innerText = msg;
       bar.className = "status-msg-bar " + classification;
     }
+
+    startInactivityTracker();
   </script>
 </body>
 </html>
