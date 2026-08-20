@@ -535,30 +535,55 @@
       miniBox.innerHTML = miniHtml;
     }
 
-    /* CAMERA SCANNER HANDLER WITH RESTRICTED TARGET RECTANGLE AREA */
+    /* MOBILE CAMERA BLACK SCREEN FIX WITH FALLBACK CONSTRAINTS */
     var scannerRunning = false;
-    function triggerLiveScanner() {
-      if ($("scanner-modal").classList.contains("active")) return;
-      isScanOnCooldown = false;
-      $("scanner-modal").classList.add("active");
-      
+
+    function initQuaggaScanner(facingModeConfig) {
       Quagga.init({
         inputStream: { 
           name: "Live", 
           type: "LiveStream", 
           target: document.querySelector("#scanner-viewport"), 
-          constraints: { facingMode: "environment", width: 1280, height: 720 },
-          area: { // Restrict barcode detection specifically to target box area
-            top: "30%",    
+          constraints: { 
+            facingMode: facingModeConfig,
+            width: { min: 640, ideal: 1280 },
+            height: { min: 480, ideal: 720 }
+          },
+          area: {
+            top: "20%",    
             right: "10%",  
             left: "10%",   
-            bottom: "30%"  
+            bottom: "20%"  
           }
         },
-        locator: { patchSize: "medium", halfSample: false },
-        decoder: { readers: ["code_128_reader", "ean_reader", "code_39_reader"] }
-      }, function(err){ if(!err) { Quagga.start(); scannerRunning = true; } });
-      Quagga.onDetected(onQuaggaFrameHit);
+        locator: { patchSize: "medium", halfSample: true },
+        decoder: { readers: ["code_128_reader", "ean_reader", "code_39_reader", "upc_reader"] }
+      }, function(err){ 
+        if (err) { 
+          console.error("Quagga initialization error:", err);
+          // Fallback mechanism for mobile devices that fail exact facingMode binding
+          if (facingModeConfig !== "environment") {
+            alert("Unable to open camera on this device. Please check camera permissions.");
+          } else {
+            initQuaggaScanner("user"); // Try default fallback camera
+          }
+          return; 
+        } 
+        Quagga.start(); 
+        scannerRunning = true; 
+      });
+    }
+
+    function triggerLiveScanner() {
+      if ($("scanner-modal").classList.contains("active")) return;
+      isScanOnCooldown = false;
+      $("scanner-modal").classList.add("active");
+
+      // Small delay to ensure modal overlay element rendering in mobile DOM
+      setTimeout(function() {
+        initQuaggaScanner({ exact: "environment" });
+        Quagga.onDetected(onQuaggaFrameHit);
+      }, 200);
     }
 
     function onQuaggaFrameHit(resultData) {
@@ -573,7 +598,10 @@
     function terminateLiveScanner() {
       scannerRunning = false;
       isScanOnCooldown = false;
-      try { Quagga.offDetected(onQuaggaFrameHit); Quagga.stop(); } catch(e){}
+      try { 
+        Quagga.offDetected(onQuaggaFrameHit); 
+        Quagga.stop(); 
+      } catch(e){}
       $("scanner-modal").classList.remove("active");
     }
 
