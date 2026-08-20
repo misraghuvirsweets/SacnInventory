@@ -39,14 +39,15 @@
     .branch-select-btn:active{ transform: scale(0.96); }
     .branch-current-tag{ font-size:12.5px; font-weight:600; color:var(--terracotta); text-align:center; margin-top:2px; }
 
-    /* DASHBOARD 3-SECOND TIMER OVERLAY BADGE */
+    /* ON-SCREEN BLUETOOTH COUNTDOWN BADGE */
     .timer-badge-display {
       display: none; align-items: center; justify-content: center; gap: 8px;
-      background: var(--terracotta); color: #fff; padding: 10px 16px; border-radius: 10px;
-      font-size: 15px; font-weight: 700; text-align: center;
-      box-shadow: 0 4px 12px rgba(166,60,25,0.25); animation: pulseTimer 0.6s infinite alternate;
+      background: var(--terracotta); color: #fff; padding: 14px 16px; border-radius: 12px;
+      font-size: 17px; font-weight: 700; text-align: center;
+      box-shadow: 0 6px 16px rgba(166,60,25,0.35); animation: pulseTimer 0.5s infinite alternate;
+      border: 2px solid #73270e; margin-bottom: 2px;
     }
-    .timer-badge-display.active { display: flex; }
+    .timer-badge-display.active { display: flex !important; }
     @keyframes pulseTimer { from { transform: scale(0.98); } to { transform: scale(1.02); } }
 
     .giant-scan-box {
@@ -110,7 +111,6 @@
       border:3px solid var(--terracotta); border-radius:14px; box-shadow:0 0 0 2000px rgba(0,0,0,0.55); z-index:2; pointer-events:none;
     }
 
-    /* ON-SCREEN CAMERA 3-SECOND TIMER CARD */
     .camera-timer-overlay {
       position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
       z-index: 10; background: rgba(0, 0, 0, 0.85); color: #fff;
@@ -167,6 +167,7 @@
           <div id="branch-current-tag" class="branch-current-tag">Please select a branch to begin scanning.</div>
         </div>
 
+        <!-- ON-SCREEN BLUETOOTH COUNTDOWN BADGE -->
         <div id="scan-timer-badge" class="timer-badge-display">
           <span>⏱ Next Scan Ready In:</span>
           <span id="scan-timer-count">3</span>s
@@ -230,9 +231,9 @@
     var selectedBranchName = null;
     var scanCountdownInterval = null;
     var cameraTimerInterval = null;
-    var isScanOnCooldown = false; // Prevents all scans (Bluetooth + Camera) during timer
+    var isScanOnCooldown = false;
 
-    /* BLUETOOTH SCANNER HANDLER */
+    /* BLUETOOTH SCANNER KEYBOARD LISTENER */
     var bluetoothBuffer = "";
     var bluetoothTimer = null;
 
@@ -240,13 +241,20 @@
       if (!selectedBranchName) return;
       if (document.activeElement && document.activeElement.tagName === "INPUT") return;
 
-      // Block Bluetooth scans if 3-second countdown timer is active
-      if (isScanOnCooldown) return;
+      if (isScanOnCooldown) {
+        bluetoothBuffer = "";
+        return;
+      }
 
       if (e.key === "Enter") {
         if (bluetoothBuffer.trim().length > 0) {
-          evaluateIncomingScannedCode(bluetoothBuffer.trim());
+          var scannedText = bluetoothBuffer.trim();
           bluetoothBuffer = "";
+          // FORCE timer display FIRST before triggering network call
+          start3SecondScanTimer();
+          setTimeout(function() {
+            evaluateIncomingScannedCode(scannedText);
+          }, 10);
         }
       } else if (e.key.length === 1) {
         bluetoothBuffer += e.key;
@@ -264,14 +272,19 @@
       if (scanCountdownInterval) clearInterval(scanCountdownInterval);
       
       countEl.innerText = secondsLeft;
+      badge.style.display = "flex";
       badge.classList.add("active");
+
+      // Force synchronous DOM reflow to make countdown visible immediately
+      void badge.offsetHeight;
 
       scanCountdownInterval = setInterval(function() {
         secondsLeft--;
         if (secondsLeft <= 0) {
           clearInterval(scanCountdownInterval);
           badge.classList.remove("active");
-          isScanOnCooldown = false; // Reactivates scanning!
+          badge.style.display = "none";
+          isScanOnCooldown = false;
         } else {
           countEl.innerText = secondsLeft;
         }
@@ -341,8 +354,6 @@
     function evaluateIncomingScannedCode(rawCodeString) {
       if (!selectedBranchName) return;
       if (navigator.vibrate) navigator.vibrate(50);
-      
-      start3SecondScanTimer();
 
       var parsed = parseCustomBarcode(rawCodeString);
       var itemCode = parsed.itemCode;
@@ -455,7 +466,7 @@
       scrollBox.innerHTML = htmlRowsGrid;
     }
 
-    /* CAMERA CONTINUOUS SCANNER WITH ON-SCREEN TIMER */
+    /* CAMERA SCANNER HANDLER */
     var scannerRunning = false;
 
     function triggerLiveScanner() {
@@ -480,6 +491,7 @@
       
       var rawStringCode = resultData.codeResult.code;
       if (rawStringCode) {
+        start3SecondScanTimer();
         evaluateIncomingScannedCode(rawStringCode);
         
         var parsed = parseCustomBarcode(rawStringCode);
