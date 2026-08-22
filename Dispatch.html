@@ -205,6 +205,7 @@
         </div>
         <div class="panel-body">
           <div id="dashboard-history-scroll" class="history-scroll-box">No entries logged in current batch workspace yet.</div>
+          <button class="master-submit-btn" type="button" style="background:#8a8578;" onclick="checkForOldData()">🔍 Check for Old Unsaved Data</button>
           <button id="save-batch-btn" class="master-submit-btn" type="button" onclick="submitEntireDeskBatch()">🚀 Save Dispatch Batch</button>
           <div id="dashboard-status-log" class="status-msg-bar"></div>
         </div>
@@ -715,6 +716,36 @@
       if(!bar) return;
       bar.innerText = msg;
       bar.className = "status-msg-bar " + classification;
+    }
+
+    // Debug helper: scans EVERY key in this browser's localStorage (not just
+    // the current STORAGE_KEY) so we can find old pending data even if it
+    // was saved under a slightly different key name in an earlier version.
+    function checkForOldData() {
+      var found = [];
+      try {
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i);
+          if (key && key.toLowerCase().indexOf("raghuvir") !== -1) {
+            try {
+              var val = JSON.parse(localStorage.getItem(key));
+              var count = Array.isArray(val) ? val.length : 0;
+              found.push(key + ": " + count + " item(s)");
+            } catch (e) {
+              found.push(key + ": (unreadable data)");
+            }
+          }
+        }
+      } catch (e) {
+        alert("Could not access local storage on this device.");
+        return;
+      }
+
+      if (found.length === 0) {
+        alert("No old unsaved data found in this browser. Nothing to recover here — those items would need to be re-scanned.");
+      } else {
+        alert("Found local data:\n\n" + found.join("\n") + "\n\nIf a key above isn't 'raghuvir_pending_dispatch_v1' with items, tap OK, then contact me with this exact list so I can add a migration step.");
+      }
     }
 
     startInactivityTracker();
